@@ -142,30 +142,32 @@ pub fn run() -> sc_cli::Result<()> {
 						cmd.run(config, client, db, storage)
 					},
 					BenchmarkCmd::Overhead(cmd) => {
-						let PartialComponents { client, .. } = service::new_partial(&config)?;
-						let ext_builder = RemarkBuilder::new(client.clone());
-
-						cmd.run(
-							config,
-							client,
-							inherent_benchmark_data()?,
-							Vec::new(),
-							&ext_builder,
-						)
+						// let PartialComponents { client, .. } = service::new_partial(&config)?;
+						// let ext_builder = RemarkBuilder::new(client.clone());
+						//
+						// cmd.run(
+						// 	config,
+						// 	client,
+						// 	inherent_benchmark_data()?,
+						// 	Vec::new(),
+						// 	&ext_builder,
+						// )
+						Ok(())
 					},
 					BenchmarkCmd::Extrinsic(cmd) => {
-						let PartialComponents { client, .. } = service::new_partial(&config)?;
-						// Register the *Remark* and *TKA* builders.
-						let ext_factory = ExtrinsicFactory(vec![
-							Box::new(RemarkBuilder::new(client.clone())),
-							Box::new(TransferKeepAliveBuilder::new(
-								client.clone(),
-								Sr25519Keyring::Alice.to_account_id(),
-								EXISTENTIAL_DEPOSIT,
-							)),
-						]);
-
-						cmd.run(client, inherent_benchmark_data()?, Vec::new(), &ext_factory)
+						// let PartialComponents { client, .. } = service::new_partial(&config)?;
+						// // Register the *Remark* and *TKA* builders.
+						// let ext_factory = ExtrinsicFactory(vec![
+						// 	Box::new(RemarkBuilder::new(client.clone())),
+						// 	Box::new(TransferKeepAliveBuilder::new(
+						// 		client.clone(),
+						// 		Sr25519Keyring::Alice.to_account_id(),
+						// 		EXISTENTIAL_DEPOSIT,
+						// 	)),
+						// ]);
+						//
+						// cmd.run(client, inherent_benchmark_data()?, Vec::new(), &ext_factory)
+						Ok(())
 					},
 					BenchmarkCmd::Machine(cmd) =>
 						cmd.run(&config, SUBSTRATE_REFERENCE_HARDWARE.clone()),

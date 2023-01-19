@@ -16,11 +16,11 @@ use sp_core::{crypto::KeyTypeId, OpaqueMetadata, U256, H160, H256};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{
-		AccountIdLookup, BlakeTwo256, Block as BlockT, IdentifyAccount, NumberFor, One, Verify,
+		AccountIdLookup, BlakeTwo256, Block as BlockT, NumberFor, One,
 		Dispatchable, PostDispatchInfoOf, DispatchInfoOf, UniqueSaturatedInto,
 	},
-	transaction_validity::{TransactionSource, TransactionValidity, TransactionValidityError},
-	ApplyExtrinsicResult, MultiSignature,
+	transaction_validity::{
+		TransactionSource, TransactionValidity, TransactionValidityError}, ApplyExtrinsicResult, ConsensusEngineId,
 };
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
@@ -29,7 +29,7 @@ use sp_version::RuntimeVersion;
 
 
 use pallet_evm::{
-	EnsureAddressRoot, EnsureAddressNever, HashedAddressMapping, Account as EVMAccount, Runner,
+	EnsureAddressRoot, EnsureAddressNever, Account as EVMAccount, Runner,
 	FeeCalculator,
 };
 
@@ -42,9 +42,10 @@ pub use fp_evm::GenesisAccount;
 
 // A few exports that help ease life for downstream crates.
 pub use frame_support::{
-	construct_runtime, parameter_types,
+	construct_runtime, parameter_types, pallet_prelude::PhantomData,
 	traits::{
 		ConstU128, ConstU32, ConstU64, ConstU8, KeyOwnerProofSystem, Randomness, StorageInfo,
+		FindAuthor,
 	},
 	weights::{
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
@@ -67,11 +68,11 @@ pub use pallet_template;
 pub type BlockNumber = u32;
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
-pub type Signature = MultiSignature;
+pub type Signature = account::EthereumSignature;
 
 /// Some way of identifying an account on the chain. We intentionally make it equivalent
 /// to the public key of our transaction signing scheme.
-pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
+pub type AccountId = AccountId20;
 
 /// Balance of an account.
 pub type Balance = u128;
@@ -154,7 +155,10 @@ pub const MAXIMUM_BLOCK_WEIGHT: Weight = WEIGHT_PER_SECOND.saturating_mul(2);
 const WEIGHT_PER_GAS: u64 = 20_000;
 
 mod precompiles;
+mod account;
+
 use precompiles::SubstratePrecompiles;
+use account::AccountId20;
 
 parameter_types! {
 	pub const BlockHashCount: BlockNumber = 2400;
@@ -303,6 +307,39 @@ parameter_types! {
 	pub PrecompilesValue: SubstratePrecompiles<Runtime> = SubstratePrecompiles::<_>::new();
 }
 
+pub struct FindAuthorTruncated<F>(PhantomData<F>);
+
+impl<F: FindAuthor<u32>> FindAuthor<H160> for FindAuthorTruncated<F> {
+	fn find_author<'a, I>(digests: I) -> Option<H160>
+		where
+			I: 'a + IntoIterator<Item=(ConsensusEngineId, &'a [u8])>,
+	{
+		use sp_core::crypto::ByteArray;
+		F::find_author(digests).and_then(|i| {
+			Aura::authorities().get(i as usize).and_then(|id| {
+				let raw = id.to_raw_vec();
+
+				if raw.len() >= 24 {
+					Some(H160::from_slice(&raw[4..24]))
+				} else {
+					None
+				}
+			})
+		})
+	}
+}
+
+// pub struct FromH160;
+//
+// impl<T> pallet_evm::AddressMapping<T> for FromH160
+// 	where
+// 		T: From<H160>,
+// {
+// 	fn into_account_id(address: H160) -> T {
+// 		address.into()
+// 	}
+// }
+
 impl pallet_evm::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
@@ -314,12 +351,12 @@ impl pallet_evm::Config for Runtime {
 
 	type CallOrigin = EnsureAddressRoot<AccountId>;
 	type WithdrawOrigin = EnsureAddressNever<AccountId>;
-	type AddressMapping = HashedAddressMapping<BlakeTwo256>;
+	type AddressMapping = account::IntoAddressMapping;
 
 	type FeeCalculator = BaseFee;
 	type GasWeightMapping = pallet_evm::FixedGasWeightMapping<Self>;
 	type OnChargeTransaction = ();
-	type FindAuthor = ();
+	type FindAuthor = FindAuthorTruncated<Aura>;
 	type PrecompilesType = SubstratePrecompiles<Self>;
 	type PrecompilesValue = PrecompilesValue;
 	type WeightPerGas = ();
@@ -336,6 +373,7 @@ parameter_types! {
 }
 
 pub struct BaseFeeThreshold;
+
 impl pallet_base_fee::BaseFeeThreshold for BaseFeeThreshold {
 	fn lower() -> Permill {
 		Permill::zero()
