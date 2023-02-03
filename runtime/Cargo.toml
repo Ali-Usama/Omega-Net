@@ -1,8 +1,8 @@
 [package]
-name = "node-template-runtime"
+name = "storage-chain-runtime"
 version = "4.0.0-dev"
 description = "A fresh FRAME-based Substrate node, ready for hacking."
-authors = ["Substrate DevHub <https://github.com/substrate-developer-hub>"]
+authors = ["Usama Ali", "Asad Ali"]
 homepage = "https://substrate.io/"
 edition = "2021"
 license = "Unlicense"

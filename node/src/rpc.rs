@@ -9,7 +9,7 @@ use std::sync::Arc;
 use std::collections::BTreeMap;
 
 use jsonrpsee::RpcModule;
-use node_template_runtime::{opaque::Block, AccountId, Balance, Index, Hash};
+use storage_chain_runtime::{opaque::Block, AccountId, Balance, Index, Hash};
 use sc_client_api::{backend::{Backend, StorageProvider, StateBackend},
 					client::BlockchainEvents,
 					AuxStore};
@@ -141,7 +141,7 @@ pub fn create_full<C, P, BE, A>(
 			client.clone(),
 			pool.clone(),
 			graph,
-			Some(node_template_runtime::TransactionConverter),
+			Some(storage_chain_runtime::TransactionConverter),
 			network.clone(),
 			signers,
 			overrides.clone(),

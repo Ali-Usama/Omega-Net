@@ -1,4 +1,4 @@
-use node_template_runtime::{
+use storage_chain_runtime::{
 	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, Signature, SudoConfig, EVMConfig,
 	SystemConfig, WASM_BINARY, GenesisAccount, EthereumConfig,
 };
