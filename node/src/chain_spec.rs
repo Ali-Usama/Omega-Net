@@ -74,12 +74,12 @@ pub fn development_config() -> Result<ChainSpec, String> {
 				// Initial PoA authorities
 				vec![authority_keys_from_seed("Alice")],
 				// Sudo account
-				array_bytes::hex_n_into_unchecked("0x55D5E776997198679A8774507CaA4b0F7841767e"),
+				AccountId::from(hex!("55D5E776997198679A8774507CaA4b0F7841767e")),
 				// Pre-funded accounts
 				vec![
-					array_bytes::hex_n_into_unchecked("0x55D5E776997198679A8774507CaA4b0F7841767e"),
-					array_bytes::hex_n_into_unchecked("0x7ed8c8a0C4d1FeA01275fE13F0Ef23bce5CBF8C3"),
-					array_bytes::hex_n_into_unchecked("0x3263236Cbc327B5519E373CC591318e56e7c5081"),
+					AccountId::from(hex!("55D5E776997198679A8774507CaA4b0F7841767e")),
+					AccountId::from(hex!("7ed8c8a0C4d1FeA01275fE13F0Ef23bce5CBF8C3")),
+					AccountId::from(hex!("3263236Cbc327B5519E373CC591318e56e7c5081")),
 					// get_account_id_from_seed::<ecdsa::Public>("Bob"),
 					// get_account_id_from_seed::<ecdsa::Public>("Alice//stash"),
 					// get_account_id_from_seed::<ecdsa::Public>("Bob//stash"),
@@ -116,12 +116,12 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 				// Initial PoA authorities
 				vec![authority_keys_from_seed("Alice"), authority_keys_from_seed("Bob")],
 				// Sudo account
-				array_bytes::hex_n_into_unchecked("0x55D5E776997198679A8774507CaA4b0F7841767e"),
+				AccountId::from(hex!("55D5E776997198679A8774507CaA4b0F7841767e")),
 				// Pre-funded accounts
 				vec![
-					array_bytes::hex_n_into_unchecked("0x55D5E776997198679A8774507CaA4b0F7841767e"),
-					array_bytes::hex_n_into_unchecked("0x7ed8c8a0C4d1FeA01275fE13F0Ef23bce5CBF8C3"),
-					array_bytes::hex_n_into_unchecked("0x3263236Cbc327B5519E373CC591318e56e7c5081"),
+					AccountId::from(hex!("55D5E776997198679A8774507CaA4b0F7841767e")),
+					AccountId::from(hex!("7ed8c8a0C4d1FeA01275fE13F0Ef23bce5CBF8C3")),
+					AccountId::from(hex!("3263236Cbc327B5519E373CC591318e56e7c5081")),
 					// get_account_id_from_seed::<ecdsa::Public>("Alice"),
 					// get_account_id_from_seed::<ecdsa::Public>("Bob"),
 					// get_account_id_from_seed::<ecdsa::Public>("Charlie"),
