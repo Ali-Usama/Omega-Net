@@ -45,7 +45,7 @@ pub use frame_support::{
 	construct_runtime, parameter_types, pallet_prelude::PhantomData,
 	traits::{
 		ConstU128, ConstU32, ConstU64, ConstU8, KeyOwnerProofSystem, Randomness, StorageInfo,
-		FindAuthor,
+		FindAuthor, OnUnbalanced, Currency, Imbalance
 	},
 	weights::{
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
@@ -281,9 +281,37 @@ parameter_types! {
 	pub FeeMultiplier: Multiplier = Multiplier::one();
 }
 
+pub struct DealWithFees;
+type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
+
+impl OnUnbalanced<NegativeImbalance> for DealWithFees {
+	fn on_unbalanceds<B>(mut fees_then_tips: impl Iterator<Item=NegativeImbalance>) {
+		if let Some(fees) = fees_then_tips.next() {
+			// for fees, 20% to treasury, 80% to author
+			let mut split = fees.ration(20, 80);
+			if let Some(tips) = fees_then_tips.next() {
+				// for tips, if any, 40% to treasury, 60% to author (though this can be anything)
+				tips.ration_merge_into(40, 60, &mut split);
+			}
+			// Treasury::on_unbalanced(split.0);
+			Author::on_unbalanced(split.1);
+		}
+	}
+}
+
+pub struct Author;
+
+impl OnUnbalanced<NegativeImbalance> for Author {
+	fn on_nonzero_unbalanced(amount: NegativeImbalance) {
+		if let Some(author) = Authorship::author() {
+			Balances::resolve_creating(&author, amount);
+		}
+	}
+}
+
 impl pallet_transaction_payment::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type OnChargeTransaction = CurrencyAdapter<Balances, ()>;
+	type OnChargeTransaction = CurrencyAdapter<Balances, DealWithFees>;
 	type OperationalFeeMultiplier = ConstU8<5>;
 	type WeightToFee = IdentityFee<Balance>;
 	type LengthToFee = IdentityFee<Balance>;
@@ -394,6 +422,28 @@ impl pallet_base_fee::Config for Runtime {
 	type DefaultElasticity = DefaultElasticity;
 }
 
+parameter_types! {
+	pub const UncleGenerations: BlockNumber = 5;
+}
+
+// pub struct AuraAccountAdapter;
+// impl FindAuthor<AccountId> for AuraAccountAdapter {
+// 	fn find_author<'a, I>(digests: I) -> Option<AccountId>
+// 		where I: 'a + IntoIterator<Item=(ConsensusEngineId, &'a [u8])>
+// 	{
+// 		pallet_aura::AuraAuthorId::<Runtime>::find_author(digests).and_then(|k| {
+// 			AccountId::try_from(k).ok()
+// 		})
+// 	}
+// }
+
+impl pallet_authorship::Config for Runtime {
+	type FindAuthor = ();
+	type UncleGenerations = UncleGenerations;
+	type FilterUncle = ();
+	type EventHandler = ();
+}
+
 
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -407,6 +457,7 @@ construct_runtime!(
 		System: frame_system,
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip,
 		Timestamp: pallet_timestamp,
+
 		Aura: pallet_aura,
 		Grandpa: pallet_grandpa,
 		Balances: pallet_balances,
@@ -414,6 +465,7 @@ construct_runtime!(
 		Sudo: pallet_sudo,
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template,
+		Authorship: pallet_authorship,
 		EVM: pallet_evm,
 		Ethereum: pallet_ethereum,
 		BaseFee: pallet_base_fee,

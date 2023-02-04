@@ -74,10 +74,10 @@ pub fn development_config() -> Result<ChainSpec, String> {
 				// Initial PoA authorities
 				vec![authority_keys_from_seed("Alice")],
 				// Sudo account
-				AccountId::from(hex!("55D5E776997198679A8774507CaA4b0F7841767e")),
+				AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")),
 				// Pre-funded accounts
 				vec![
-					AccountId::from(hex!("55D5E776997198679A8774507CaA4b0F7841767e")),
+					AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")),
 					AccountId::from(hex!("7ed8c8a0C4d1FeA01275fE13F0Ef23bce5CBF8C3")),
 					AccountId::from(hex!("3263236Cbc327B5519E373CC591318e56e7c5081")),
 					// get_account_id_from_seed::<ecdsa::Public>("Bob"),
@@ -190,7 +190,7 @@ fn testnet_genesis(
 					// SS58: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
 					// hex: 0xd43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d
 					// Using the full hex key, truncating to the first 20 bytes (the first 40 hex chars)
-					H160::from_str("7ed8c8a0C4d1FeA01275fE13F0Ef23bce5CBF8C3")
+					H160::from_str("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")
 						.expect("internal H160 is valid; qed"),
 					GenesisAccount {
 						balance: U256::from_str("0xffffffffffffffffffffffffffffffff")
