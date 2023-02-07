@@ -1,6 +1,6 @@
 use storage_chain_runtime::{
 	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, Signature, SudoConfig, EVMConfig,
-	SystemConfig, WASM_BINARY, GenesisAccount, EthereumConfig,
+	SystemConfig, WASM_BINARY, GenesisAccount, EthereumConfig, Balance, currency::*,
 };
 use sc_service::{ChainType, Properties};
 use hex_literal::hex;
@@ -9,6 +9,7 @@ use sp_core::{ecdsa, Pair, Public, H160, U256, H256};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
 use std::{collections::BTreeMap, str::FromStr};
+use frame_benchmarking::frame_support::metadata::StorageEntryModifier::Default;
 use libsecp256k1::{PublicKey, PublicKeyFormat};
 use sha3::{Digest, Keccak256};
 
@@ -160,6 +161,7 @@ fn testnet_genesis(
 	endowed_accounts: Vec<AccountId>,
 	_enable_println: bool,
 ) -> GenesisConfig {
+	const ENDOWMENT: Balance = 5_000_000_000 * STOR;
 	GenesisConfig {
 		system: SystemConfig {
 			// Add Wasm runtime to storage.
@@ -167,7 +169,7 @@ fn testnet_genesis(
 		},
 		balances: BalancesConfig {
 			// Configure endowed accounts with initial balance of 1 << 60.
-			balances: endowed_accounts.iter().cloned().map(|k| (k, 1 << 60)).collect(),
+			balances: endowed_accounts.iter().cloned().map(|k| (k, ENDOWMENT / initial_authorities.len() as u128)).collect(),
 		},
 		aura: AuraConfig {
 			authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect(),
@@ -184,30 +186,29 @@ fn testnet_genesis(
 			accounts: {
 				// Prefund the "ALICE" account
 				let mut accounts = BTreeMap::new();
-				accounts.insert(
+				// accounts.insert(
 					// H160 address of Alice dev account
 					// Derived from SS58 (42 prefix) address
 					// SS58: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
 					// hex: 0xd43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d
 					// Using the full hex key, truncating to the first 20 bytes (the first 40 hex chars)
-					H160::from_str("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")
-						.expect("internal H160 is valid; qed"),
-					GenesisAccount {
-						balance: U256::from_str("0xffffffffffffffffffffffffffffffff")
-							.expect("internal U256 is valid; qed"),
-						code: vec![],
-						nonce: U256::zero(),
-						storage: BTreeMap::new(),
-					},
-				);
+				// 	H160::from_str("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")
+				// 		.expect("internal H160 is valid; qed"),
+				// 	GenesisAccount {
+				// 		balance: U256::from_str("0xffffffffffffffffffffffffffffffff")
+				// 			.expect("internal U256 is valid; qed"),
+				// 		code: vec![],
+				// 		nonce: U256::zero(),
+				// 		storage: BTreeMap::new(),
+				// 	},
+				// );
 
 				accounts.insert(
 					H160::from_slice(&hex!("6Be02d1d3665660d22FF9624b7BE0551ee1Ac91b")),
 					GenesisAccount {
 						nonce: U256::zero(),
 						// Using a larger number, so I can tell the accounts apart by balance.
-						balance: U256::from_str("0xffffffffffffffffffffffff")
-							.expect("internal U256 is valid; qed"),
+						balance: Default::default(),
 						code: vec![],
 						storage: BTreeMap::new(),
 					},

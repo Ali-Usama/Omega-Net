@@ -17,7 +17,7 @@ use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{
 		AccountIdLookup, BlakeTwo256, Block as BlockT, NumberFor, One,
-		Dispatchable, PostDispatchInfoOf, DispatchInfoOf, UniqueSaturatedInto,
+		Dispatchable, PostDispatchInfoOf, DispatchInfoOf, UniqueSaturatedInto, OpaqueKeys,
 	},
 	transaction_validity::{
 		TransactionSource, TransactionValidity, TransactionValidityError}, ApplyExtrinsicResult, ConsensusEngineId,
@@ -82,6 +82,29 @@ pub type Index = u32;
 
 /// A hash of some data used by the chain.
 pub type Hash = sp_core::H256;
+
+pub mod currency {
+	use super::Balance;
+
+	pub const SUPPLY_FACTOR: Balance = 100;
+
+	pub const WEI: Balance = 1;
+	pub const KILOWEI: Balance = 1_000;
+	pub const MEGAWEI: Balance = 1_000_000;
+	pub const GIGAWEI: Balance = 1_000_000_000;
+	pub const MICROSTOR: Balance = 1_000_000_000_000;
+	pub const MILLISTOR: Balance = 1_000_000_000_000_000;
+	pub const STOR: Balance = 1_000_000_000_000_000_000;
+	pub const KILOSTOR: Balance = 1_000_000_000_000_000_000_000;
+
+	pub const TRANSACTION_BYTE_FEE: Balance = 1 * GIGAWEI * SUPPLY_FACTOR;
+	pub const STORAGE_BYTE_FEE: Balance = 100 * MICROSTOR * SUPPLY_FACTOR;
+	pub const WEIGHT_FEE: Balance = 50 * KILOWEI * SUPPLY_FACTOR;
+
+	pub const fn deposit(items: u32, bytes: u32) -> Balance {
+		items as Balance * 100 * MILLISTOR * SUPPLY_FACTOR + (bytes as Balance) * STORAGE_BYTE_FEE
+	}
+}
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -261,7 +284,7 @@ impl pallet_timestamp::Config for Runtime {
 }
 
 /// Existential deposit.
-pub const EXISTENTIAL_DEPOSIT: u128 = 500;
+pub const EXISTENTIAL_DEPOSIT: u128 = 1 * currency::KILOWEI;
 
 impl pallet_balances::Config for Runtime {
 	/// The type for recording an account's balance.
@@ -444,6 +467,22 @@ impl pallet_authorship::Config for Runtime {
 	type EventHandler = ();
 }
 
+// impl pallet_session::Config for Runtime {
+// 	type RuntimeEvent = RuntimeEvent;
+// 	type ValidatorId = <Self as frame_system::Config>::AccountId;
+// 	type ValidatorIdOf = ();
+// 	type ShouldEndSession = ();
+// 	type NextSessionRotation = ();
+// 	type SessionManager = pallet_session::historical::NoteHistoricalRoot<Self, ()>;
+// 	type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
+// 	type Keys = opaque::SessionKeys;
+// 	type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
+// }
+
+// impl pallet_session::historical::Config for Runtime {
+// 	type FullIdentification = pallet_staking::Exposure<AccountId, Balance>;
+// 	type FullIdentificationOf = pallet_staking::ExposureOf<Runtime>;
+// }
 
 
 // Create the runtime by composing the FRAME pallets that were previously configured.
@@ -457,15 +496,18 @@ construct_runtime!(
 		System: frame_system,
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip,
 		Timestamp: pallet_timestamp,
+		Authorship: pallet_authorship,
 
 		Aura: pallet_aura,
 		Grandpa: pallet_grandpa,
 		Balances: pallet_balances,
+
+		// Session: pallet_session,
 		TransactionPayment: pallet_transaction_payment,
 		Sudo: pallet_sudo,
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template,
-		Authorship: pallet_authorship,
+
 		EVM: pallet_evm,
 		Ethereum: pallet_ethereum,
 		BaseFee: pallet_base_fee,
