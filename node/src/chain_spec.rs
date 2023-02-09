@@ -1,15 +1,16 @@
 use storage_chain_runtime::{
 	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, Signature, SudoConfig, EVMConfig,
-	SystemConfig, WASM_BINARY, GenesisAccount, EthereumConfig, Balance, currency::*,
+	SystemConfig, WASM_BINARY, GenesisAccount, EthereumConfig, Balance, currency::*, SessionConfig,
+	opaque::SessionKeys,
 };
 use sc_service::{ChainType, Properties};
 use hex_literal::hex;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{ecdsa, Pair, Public, H160, U256, H256};
+use sp_core::{ecdsa, Pair, Public, H160, U256, H256, ed25519};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 use sp_runtime::traits::{IdentifyAccount, Verify};
-use std::{collections::BTreeMap, str::FromStr};
-use frame_benchmarking::frame_support::metadata::StorageEntryModifier::Default;
+use std::{collections::BTreeMap, str::FromStr, default::Default};
+// use frame_benchmarking::frame_support::metadata::StorageEntryModifier::Default;
 use libsecp256k1::{PublicKey, PublicKeyFormat};
 use sha3::{Digest, Keccak256};
 
@@ -19,26 +20,38 @@ use sha3::{Digest, Keccak256};
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
 
-/// Generate a crypto pair from seed.
-pub fn get_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
-	TPublic::Pair::from_string(&format!("//{}", seed), None)
-		.expect("static values are valid; qed")
+type AccountPublic = <Signature as Verify>::Signer;
+
+/// Helper function to generate a crypto pair from seed
+fn get_from_secret<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
+	TPublic::Pair::from_string(seed, None)
+		.unwrap_or_else(|_| panic!("Invalid string '{}'", seed))
 		.public()
 }
 
-type AccountPublic = <Signature as Verify>::Signer;
-
-/// Generate an account ID from seed.
-pub fn get_account_id_from_seed<TPublic: Public>(seed: &str) -> AccountId
+/// Helper function to generate an account ID from seed
+fn get_account_id_from_secret<TPublic: Public>(seed: &str) -> AccountId
 	where
 		AccountPublic: From<<TPublic::Pair as Pair>::Public>,
 {
-	AccountPublic::from(get_from_seed::<TPublic>(seed)).into_account()
+	AccountPublic::from(get_from_secret::<TPublic>(seed)).into_account()
 }
 
-/// Generate an Aura authority key.
-pub fn authority_keys_from_seed(s: &str) -> (AuraId, GrandpaId) {
-	(get_from_seed::<AuraId>(s), get_from_seed::<GrandpaId>(s))
+/// Helper function to generate an authority key for Aura
+fn get_authority_keys_from_secret(seed: &str) -> (AccountId, AuraId, GrandpaId) {
+	(
+		// get_account_id_from_secret::<ed25519::Public>(seed),
+		AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")),
+		get_from_secret::<AuraId>(seed),
+		get_from_secret::<GrandpaId>(seed),
+	)
+}
+
+fn session_keys(
+	aura: AuraId,
+	grandpa: GrandpaId,
+) -> SessionKeys {
+	SessionKeys { aura, grandpa }
 }
 
 pub fn chainspec_properties() -> Properties {
@@ -47,6 +60,13 @@ pub fn chainspec_properties() -> Properties {
 	properties.insert("tokenSymbol".into(), "STOR".into());
 	properties
 }
+
+
+const ALITH: &str = "0xf24FF3a9CF04c71Dbc94D0b566f7A27B94566cac";
+const BALTATHAR: &str = "0x3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0";
+const CHARLETH: &str = "0x798d4Ba9baf0064Ec19eB4F0a1a45785ae9D6DFc";
+const DOROTHY: &str = "0x773539d4Ac0e786233D90A233654ccEE26a613D9";
+const ETHAN: &str = "0xFf64d3F6efE2317EE2807d223a0Bdc4c0c49dfDB";
 
 /// Helper function to get an `AccountId` from an ECDSA Key Pair.
 pub fn get_account_id_from_pair(pair: ecdsa::Pair) -> Option<AccountId> {
@@ -73,9 +93,14 @@ pub fn development_config() -> Result<ChainSpec, String> {
 			testnet_genesis(
 				wasm_binary,
 				// Initial PoA authorities
-				vec![authority_keys_from_seed("Alice")],
+				vec![
+					(array_bytes::hex_n_into_unchecked(ALITH),
+					 get_from_secret::<AuraId>("//Alice"),
+					 get_from_secret::<GrandpaId>("//Alice")),
+				],
 				// Sudo account
 				AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")),
+				// get_account_id_from_secret::<ed25519::Public>("//Alice"),
 				// Pre-funded accounts
 				vec![
 					AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")),
@@ -84,6 +109,10 @@ pub fn development_config() -> Result<ChainSpec, String> {
 					// get_account_id_from_seed::<ecdsa::Public>("Bob"),
 					// get_account_id_from_seed::<ecdsa::Public>("Alice//stash"),
 					// get_account_id_from_seed::<ecdsa::Public>("Bob//stash"),
+					// get_account_id_from_secret::<ed25519::Public>("//Alice"),
+					// get_account_id_from_secret::<ed25519::Public>("//Bob"),
+					// get_account_id_from_secret::<sr25519::Public>("//Alice"),
+					// get_account_id_from_secret::<sr25519::Public>("//Bob"),
 				],
 				true,
 			)
@@ -115,14 +144,25 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 			testnet_genesis(
 				wasm_binary,
 				// Initial PoA authorities
-				vec![authority_keys_from_seed("Alice"), authority_keys_from_seed("Bob")],
+				vec![
+					(array_bytes::hex_n_into_unchecked(ALITH),
+					 get_from_secret::<AuraId>("//Alice"),
+					 get_from_secret::<GrandpaId>("//Alice")),
+					(array_bytes::hex_n_into_unchecked(BALTATHAR),
+					 get_from_secret::<AuraId>("//Bob"),
+					 get_from_secret::<GrandpaId>("//Bob")),
+				],
 				// Sudo account
 				AccountId::from(hex!("55D5E776997198679A8774507CaA4b0F7841767e")),
 				// Pre-funded accounts
 				vec![
-					AccountId::from(hex!("55D5E776997198679A8774507CaA4b0F7841767e")),
-					AccountId::from(hex!("7ed8c8a0C4d1FeA01275fE13F0Ef23bce5CBF8C3")),
-					AccountId::from(hex!("3263236Cbc327B5519E373CC591318e56e7c5081")),
+					array_bytes::hex_n_into_unchecked(ALITH),
+					array_bytes::hex_n_into_unchecked(BALTATHAR),
+					array_bytes::hex_n_into_unchecked(CHARLETH),
+					array_bytes::hex_n_into_unchecked(DOROTHY),
+					// AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")),
+					// AccountId::from(hex!("7ed8c8a0C4d1FeA01275fE13F0Ef23bce5CBF8C3")),
+					// AccountId::from(hex!("3263236Cbc327B5519E373CC591318e56e7c5081")),
 					// get_account_id_from_seed::<ecdsa::Public>("Alice"),
 					// get_account_id_from_seed::<ecdsa::Public>("Bob"),
 					// get_account_id_from_seed::<ecdsa::Public>("Charlie"),
@@ -156,12 +196,12 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 /// Configure initial storage state for FRAME modules.
 fn testnet_genesis(
 	wasm_binary: &[u8],
-	initial_authorities: Vec<(AuraId, GrandpaId)>,
+	initial_authorities: Vec<(AccountId, AuraId, GrandpaId)>,
 	root_key: AccountId,
 	endowed_accounts: Vec<AccountId>,
 	_enable_println: bool,
 ) -> GenesisConfig {
-	const ENDOWMENT: Balance = 5_000_000_000 * STOR;
+	const ENDOWMENT: Balance = 2_500_000_000 * STOR;
 	GenesisConfig {
 		system: SystemConfig {
 			// Add Wasm runtime to storage.
@@ -169,14 +209,16 @@ fn testnet_genesis(
 		},
 		balances: BalancesConfig {
 			// Configure endowed accounts with initial balance of 1 << 60.
-			balances: endowed_accounts.iter().cloned().map(|k| (k, ENDOWMENT / initial_authorities.len() as u128)).collect(),
+			balances: endowed_accounts.iter().cloned().map(|k| (k.clone(), ENDOWMENT / initial_authorities.len() as u128)).collect(),
 		},
-		aura: AuraConfig {
-			authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect(),
-		},
-		grandpa: GrandpaConfig {
-			authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect(),
-		},
+		aura: Default::default(),
+		// AuraConfig {
+		// 	authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect(),
+		// },
+		grandpa: Default::default(),
+		// GrandpaConfig {
+		// 	authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect(),
+		// },
 		sudo: SudoConfig {
 			// Assign network admin rights.
 			key: Some(root_key),
@@ -184,30 +226,11 @@ fn testnet_genesis(
 		transaction_payment: Default::default(),
 		evm: EVMConfig {
 			accounts: {
-				// Prefund the "ALICE" account
 				let mut accounts = BTreeMap::new();
-				// accounts.insert(
-					// H160 address of Alice dev account
-					// Derived from SS58 (42 prefix) address
-					// SS58: 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY
-					// hex: 0xd43593c715fdd31c61141abd04a99fd6822c8558854ccde39a5684e7a56da27d
-					// Using the full hex key, truncating to the first 20 bytes (the first 40 hex chars)
-				// 	H160::from_str("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")
-				// 		.expect("internal H160 is valid; qed"),
-				// 	GenesisAccount {
-				// 		balance: U256::from_str("0xffffffffffffffffffffffffffffffff")
-				// 			.expect("internal U256 is valid; qed"),
-				// 		code: vec![],
-				// 		nonce: U256::zero(),
-				// 		storage: BTreeMap::new(),
-				// 	},
-				// );
-
 				accounts.insert(
 					H160::from_slice(&hex!("6Be02d1d3665660d22FF9624b7BE0551ee1Ac91b")),
 					GenesisAccount {
 						nonce: U256::zero(),
-						// Using a larger number, so I can tell the accounts apart by balance.
 						balance: Default::default(),
 						code: vec![],
 						storage: BTreeMap::new(),
@@ -215,6 +238,20 @@ fn testnet_genesis(
 				);
 				accounts
 			}
+		},
+		session: SessionConfig {
+			keys: initial_authorities
+				.iter()
+				.map(|x| {
+					(
+						x.0.clone(),
+						x.0.clone(),
+						session_keys(
+							x.1.clone(), x.2.clone(),
+						),
+					)
+				})
+				.collect::<Vec<_>>(),
 		},
 		ethereum: EthereumConfig {},
 		base_fee: Default::default(),

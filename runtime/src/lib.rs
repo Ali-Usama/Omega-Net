@@ -81,7 +81,7 @@ pub type Balance = u128;
 pub type Index = u32;
 
 /// A hash of some data used by the chain.
-pub type Hash = sp_core::H256;
+pub type Hash = H256;
 
 pub mod currency {
 	use super::Balance;
@@ -310,11 +310,11 @@ type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
 impl OnUnbalanced<NegativeImbalance> for DealWithFees {
 	fn on_unbalanceds<B>(mut fees_then_tips: impl Iterator<Item=NegativeImbalance>) {
 		if let Some(fees) = fees_then_tips.next() {
-			// for fees, 20% to treasury, 80% to author
-			let mut split = fees.ration(20, 80);
+			// for fees, 10% to treasury, 90% to author
+			let mut split = fees.ration(10, 90);
 			if let Some(tips) = fees_then_tips.next() {
-				// for tips, if any, 40% to treasury, 60% to author (though this can be anything)
-				tips.ration_merge_into(40, 60, &mut split);
+				// for tips, if any, 100% (though this can be anything)
+				tips.merge_into(&mut split.1);
 			}
 			// Treasury::on_unbalanced(split.0);
 			Author::on_unbalanced(split.1);
@@ -446,7 +446,7 @@ impl pallet_base_fee::Config for Runtime {
 }
 
 parameter_types! {
-	pub const UncleGenerations: BlockNumber = 5;
+	pub const UncleGenerations: BlockNumber = 0;
 }
 
 // pub struct AuraAccountAdapter;
@@ -461,23 +461,28 @@ parameter_types! {
 // }
 
 impl pallet_authorship::Config for Runtime {
-	type FindAuthor = ();
+	type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Aura>;
 	type UncleGenerations = UncleGenerations;
 	type FilterUncle = ();
 	type EventHandler = ();
 }
 
-// impl pallet_session::Config for Runtime {
-// 	type RuntimeEvent = RuntimeEvent;
-// 	type ValidatorId = <Self as frame_system::Config>::AccountId;
-// 	type ValidatorIdOf = ();
-// 	type ShouldEndSession = ();
-// 	type NextSessionRotation = ();
-// 	type SessionManager = pallet_session::historical::NoteHistoricalRoot<Self, ()>;
-// 	type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
-// 	type Keys = opaque::SessionKeys;
-// 	type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
-// }
+parameter_types! {
+	pub const Period: u32 = 0xFFFF_FFFF;
+	pub const Offset: u32 = 0xFFFF_FFFF;
+}
+
+impl pallet_session::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type ValidatorId =AccountId;
+	type ValidatorIdOf = ();
+	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
+	type NextSessionRotation = ();
+	type SessionManager = ();
+	type SessionHandler = <opaque::SessionKeys as OpaqueKeys>::KeyTypeIdProviders;
+	type Keys = opaque::SessionKeys;
+	type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
+}
 
 // impl pallet_session::historical::Config for Runtime {
 // 	type FullIdentification = pallet_staking::Exposure<AccountId, Balance>;
@@ -496,15 +501,15 @@ construct_runtime!(
 		System: frame_system,
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip,
 		Timestamp: pallet_timestamp,
-		Authorship: pallet_authorship,
 
 		Aura: pallet_aura,
 		Grandpa: pallet_grandpa,
 		Balances: pallet_balances,
-
-		// Session: pallet_session,
 		TransactionPayment: pallet_transaction_payment,
 		Sudo: pallet_sudo,
+
+		Session: pallet_session,
+		Authorship: pallet_authorship,
 		// Include the custom logic from the pallet-template in the runtime.
 		TemplateModule: pallet_template,
 
