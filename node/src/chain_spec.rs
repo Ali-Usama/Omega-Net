@@ -1,15 +1,15 @@
 use storage_chain_runtime::{
-	AccountId, AuraConfig, BalancesConfig, GenesisConfig, GrandpaConfig, Signature, SudoConfig, EVMConfig,
+	AccountId, BalancesConfig, GenesisConfig, SudoConfig, EVMConfig,
 	SystemConfig, WASM_BINARY, GenesisAccount, EthereumConfig, Balance, currency::*, SessionConfig,
 	opaque::SessionKeys,
 };
 use sc_service::{ChainType, Properties};
 use hex_literal::hex;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{ecdsa, Pair, Public, H160, U256, H256, ed25519};
+use sp_core::{ecdsa, Pair, Public, H160, U256, H256};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
-use sp_runtime::traits::{IdentifyAccount, Verify};
-use std::{collections::BTreeMap, str::FromStr, default::Default};
+// use sp_runtime::traits::{IdentifyAccount, Verify};
+use std::{collections::BTreeMap, default::Default};
 // use frame_benchmarking::frame_support::metadata::StorageEntryModifier::Default;
 use libsecp256k1::{PublicKey, PublicKeyFormat};
 use sha3::{Digest, Keccak256};
@@ -20,7 +20,7 @@ use sha3::{Digest, Keccak256};
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
 
-type AccountPublic = <Signature as Verify>::Signer;
+// type AccountPublic = <Signature as Verify>::Signer;
 
 /// Helper function to generate a crypto pair from seed
 fn get_from_secret<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -30,22 +30,22 @@ fn get_from_secret<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Publ
 }
 
 /// Helper function to generate an account ID from seed
-fn get_account_id_from_secret<TPublic: Public>(seed: &str) -> AccountId
-	where
-		AccountPublic: From<<TPublic::Pair as Pair>::Public>,
-{
-	AccountPublic::from(get_from_secret::<TPublic>(seed)).into_account()
-}
+// fn get_account_id_from_secret<TPublic: Public>(seed: &str) -> AccountId
+// 	where
+// 		AccountPublic: From<<TPublic::Pair as Pair>::Public>,
+// {
+// 	AccountPublic::from(get_from_secret::<TPublic>(seed)).into_account()
+// }
 
 /// Helper function to generate an authority key for Aura
-fn get_authority_keys_from_secret(seed: &str) -> (AccountId, AuraId, GrandpaId) {
-	(
-		// get_account_id_from_secret::<ed25519::Public>(seed),
-		AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")),
-		get_from_secret::<AuraId>(seed),
-		get_from_secret::<GrandpaId>(seed),
-	)
-}
+// fn get_authority_keys_from_secret(seed: &str) -> (AccountId, AuraId, GrandpaId) {
+// 	(
+// 		// get_account_id_from_secret::<ed25519::Public>(seed),
+// 		AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")),
+// 		get_from_secret::<AuraId>(seed),
+// 		get_from_secret::<GrandpaId>(seed),
+// 	)
+// }
 
 fn session_keys(
 	aura: AuraId,
@@ -66,19 +66,19 @@ const ALITH: &str = "0xf24FF3a9CF04c71Dbc94D0b566f7A27B94566cac";
 const BALTATHAR: &str = "0x3Cd0A705a2DC65e5b1E1205896BaA2be8A07c6e0";
 const CHARLETH: &str = "0x798d4Ba9baf0064Ec19eB4F0a1a45785ae9D6DFc";
 const DOROTHY: &str = "0x773539d4Ac0e786233D90A233654ccEE26a613D9";
-const ETHAN: &str = "0xFf64d3F6efE2317EE2807d223a0Bdc4c0c49dfDB";
+// const ETHAN: &str = "0xFf64d3F6efE2317EE2807d223a0Bdc4c0c49dfDB";
 
 /// Helper function to get an `AccountId` from an ECDSA Key Pair.
-pub fn get_account_id_from_pair(pair: ecdsa::Pair) -> Option<AccountId> {
-	let decompressed = PublicKey::parse_slice(&pair.public().0, Some(PublicKeyFormat::Compressed))
-		.ok()?
-		.serialize();
-
-	let mut m = [0u8; 64];
-	m.copy_from_slice(&decompressed[1..65]);
-
-	Some(H160::from(H256::from_slice(Keccak256::digest(&m).as_slice())).into())
-}
+// pub fn get_account_id_from_pair(pair: ecdsa::Pair) -> Option<AccountId> {
+// 	let decompressed = PublicKey::parse_slice(&pair.public().0, Some(PublicKeyFormat::Compressed))
+// 		.ok()?
+// 		.serialize();
+//
+// 	let mut m = [0u8; 64];
+// 	m.copy_from_slice(&decompressed[1..65]);
+//
+// 	Some(H160::from(H256::from_slice(Keccak256::digest(&m).as_slice())).into())
+// }
 
 pub fn development_config() -> Result<ChainSpec, String> {
 	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
