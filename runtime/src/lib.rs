@@ -218,7 +218,8 @@ impl frame_system::Config for Runtime {
 	/// The identifier used to distinguish between accounts.
 	type AccountId = AccountId;
 	/// The lookup mechanism to get account ID from whatever is passed in dispatchers.
-	type Lookup = AccountIdLookup<AccountId, ()>;
+	// type Lookup = AccountIdLookup<AccountId, ()>;
+	type Lookup = sp_runtime::traits::IdentityLookup<AccountId>;
 	/// The header type.
 	type Header = generic::Header<BlockNumber, BlakeTwo256>;
 	/// The ubiquitous event type.
@@ -380,37 +381,39 @@ impl<F: FindAuthor<u32>> FindAuthor<H160> for FindAuthorTruncated<F> {
 	}
 }
 
-// pub struct FromH160;
-//
-// impl<T> pallet_evm::AddressMapping<T> for FromH160
-// 	where
-// 		T: From<H160>,
-// {
-// 	fn into_account_id(address: H160) -> T {
-// 		address.into()
-// 	}
-// }
+pub struct StorageFindAuthor<Inner>(PhantomData<Inner>);
+impl<Inner> FindAuthor<H160> for StorageFindAuthor<Inner>
+where
+	Inner: FindAuthor<AccountId>,
+{
+	fn find_author<'a, I>(digests: I) -> Option<H160>
+	where
+		I: 'a + IntoIterator<Item = (ConsensusEngineId, &'a [u8])>,
+	{
+		Inner::find_author(digests).map(Into::into)
+	}
+}
 
 impl pallet_evm::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-	type Currency = Balances;
-
-	type BlockGasLimit = BlockGasLimit;
-	type ChainId = LeetChainId;
-	type BlockHashMapping = EthereumBlockHashMapping<Self>;
-	type Runner = pallet_evm::runner::stack::Runner<Self>;
-
-	type CallOrigin = EnsureAddressRoot<AccountId>;
-	type WithdrawOrigin = EnsureAddressNever<AccountId>;
-	type AddressMapping = account::IntoAddressMapping;
-
 	type FeeCalculator = BaseFee;
 	type GasWeightMapping = pallet_evm::FixedGasWeightMapping<Self>;
-	type OnChargeTransaction = ();
-	type FindAuthor = FindAuthorTruncated<Aura>;
+
+	type WeightPerGas = ();
+	type BlockHashMapping = EthereumBlockHashMapping<Self>;
+	type CallOrigin = EnsureAddressRoot<AccountId>;
+	type WithdrawOrigin = EnsureAddressNever<AccountId>;
+
+	type AddressMapping = account::IntoAddressMapping;
+	type Currency = Balances;
+	type RuntimeEvent = RuntimeEvent;
+
 	type PrecompilesType = SubstratePrecompiles<Self>;
 	type PrecompilesValue = PrecompilesValue;
-	type WeightPerGas = ();
+	type ChainId = LeetChainId;
+	type BlockGasLimit = BlockGasLimit;
+	type Runner = pallet_evm::runner::stack::Runner<Self>;
+	type OnChargeTransaction = ();
+	type FindAuthor = StorageFindAuthor<pallet_session::FindAccountFromAuthorIndex<Self, Aura>>;
 }
 
 impl pallet_ethereum::Config for Runtime {
@@ -544,7 +547,8 @@ impl fp_rpc::ConvertTransaction<opaque::UncheckedExtrinsic> for TransactionConve
 }
 
 /// The address format for describing accounts.
-pub type Address = sp_runtime::MultiAddress<AccountId, ()>;
+// pub type Address = sp_runtime::MultiAddress<AccountId, ()>;
+pub type Address = AccountId;
 /// Block header type as expected by this runtime.
 pub type Header = generic::Header<BlockNumber, BlakeTwo256>;
 /// Block type as expected by this runtime.
