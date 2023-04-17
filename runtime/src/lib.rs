@@ -16,7 +16,7 @@ use sp_core::{crypto::KeyTypeId, OpaqueMetadata, U256, H160, H256};
 use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{
-		AccountIdLookup, BlakeTwo256, Block as BlockT, NumberFor, One,
+		BlakeTwo256, Block as BlockT, NumberFor, One,
 		Dispatchable, PostDispatchInfoOf, DispatchInfoOf, UniqueSaturatedInto, OpaqueKeys,
 	},
 	transaction_validity::{
@@ -48,7 +48,7 @@ pub use frame_support::{
 		FindAuthor, OnUnbalanced, Currency, Imbalance
 	},
 	weights::{
-		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
+		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_REF_TIME_PER_SECOND},
 		IdentityFee, Weight,
 	},
 	StorageValue,
@@ -61,8 +61,6 @@ use pallet_transaction_payment::{ConstFeeMultiplier, CurrencyAdapter, Multiplier
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
-/// Import the template pallet.
-pub use pallet_template;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -174,7 +172,7 @@ pub fn native_version() -> NativeVersion {
 
 const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 /// We allow for 2 seconds of compute with a 6 second average block time.
-pub const MAXIMUM_BLOCK_WEIGHT: Weight = WEIGHT_PER_SECOND.saturating_mul(2);
+// pub const MAXIMUM_BLOCK_WEIGHT: Weight = WEIGHT_PER_SECOND.saturating_mul(2);
 const WEIGHT_PER_GAS: u64 = 20_000;
 
 mod precompiles;
@@ -187,8 +185,11 @@ parameter_types! {
 	pub const BlockHashCount: BlockNumber = 2400;
 	pub const Version: RuntimeVersion = VERSION;
 	/// We allow for 2 seconds of compute with a 6 second average block time.
-	pub BlockWeights: frame_system::limits::BlockWeights = frame_system::limits::BlockWeights
-		::with_sensible_defaults(2u64 * WEIGHT_PER_SECOND, NORMAL_DISPATCH_RATIO);
+	pub BlockWeights: frame_system::limits::BlockWeights =
+		frame_system::limits::BlockWeights::with_sensible_defaults(
+			Weight::from_parts(2u64 * WEIGHT_REF_TIME_PER_SECOND, u64::MAX),
+			NORMAL_DISPATCH_RATIO,
+		);
 	pub BlockLength: frame_system::limits::BlockLength = frame_system::limits::BlockLength
 		::max_with_normal_ratio(5 * 1024 * 1024, NORMAL_DISPATCH_RATIO);
 	pub const SS58Prefix: u8 = 42;
@@ -348,14 +349,10 @@ impl pallet_sudo::Config for Runtime {
 }
 
 
-/// Configure the pallet-template in pallets/template.
-impl pallet_template::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
-}
 
 parameter_types! {
 	pub const LeetChainId: u64 = 8726;
-	pub BlockGasLimit: U256 = U256::from(NORMAL_DISPATCH_RATIO * MAXIMUM_BLOCK_WEIGHT.ref_time() / WEIGHT_PER_GAS);
+	pub BlockGasLimit: U256 = U256::from(NORMAL_DISPATCH_RATIO * WEIGHT_REF_TIME_PER_SECOND / WEIGHT_PER_GAS);
 	pub PrecompilesValue: SubstratePrecompiles<Runtime> = SubstratePrecompiles::<_>::new();
 }
 
@@ -413,6 +410,7 @@ impl pallet_evm::Config for Runtime {
 	type BlockGasLimit = BlockGasLimit;
 	type Runner = pallet_evm::runner::stack::Runner<Self>;
 	type OnChargeTransaction = ();
+	type OnCreate = ();
 	type FindAuthor = StorageFindAuthor<pallet_session::FindAccountFromAuthorIndex<Self, Aura>>;
 }
 
@@ -513,8 +511,6 @@ construct_runtime!(
 
 		Session: pallet_session,
 		Authorship: pallet_authorship,
-		// Include the custom logic from the pallet-template in the runtime.
-		TemplateModule: pallet_template,
 
 		EVM: pallet_evm,
 		Ethereum: pallet_ethereum,
@@ -590,7 +586,6 @@ mod benches {
 		[frame_system, SystemBench::<Runtime>]
 		[pallet_balances, Balances]
 		[pallet_timestamp, Timestamp]
-		[pallet_template, TemplateModule]
 	);
 }
 
@@ -639,6 +634,9 @@ impl fp_self_contained::SelfContainedCall for RuntimeCall {
 impl_runtime_apis! {
 
 	impl fp_rpc::EthereumRuntimeRPCApi<Block> for Runtime {
+
+		fn gas_limit_multiplier_support() {}
+
 		fn chain_id() -> u64 {
 			<Runtime as pallet_evm::Config>::ChainId::get()
 		}
