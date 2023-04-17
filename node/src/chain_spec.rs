@@ -6,13 +6,13 @@ use storage_chain_runtime::{
 use sc_service::{ChainType, Properties};
 use hex_literal::hex;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
-use sp_core::{ecdsa, Pair, Public, H160, U256, H256};
+use sp_core::{ Pair, Public, H160, U256};
 use sp_finality_grandpa::AuthorityId as GrandpaId;
 // use sp_runtime::traits::{IdentifyAccount, Verify};
 use std::{collections::BTreeMap, default::Default};
 // use frame_benchmarking::frame_support::metadata::StorageEntryModifier::Default;
-use libsecp256k1::{PublicKey, PublicKeyFormat};
-use sha3::{Digest, Keccak256};
+// use libsecp256k1::{PublicKey, PublicKeyFormat};
+// use sha3::{Digest};
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
