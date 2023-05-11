@@ -151,30 +151,19 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 					(array_bytes::hex_n_into_unchecked(BALTATHAR),
 					 get_from_secret::<AuraId>("//Bob"),
 					 get_from_secret::<GrandpaId>("//Bob")),
+					(array_bytes::hex_n_into_unchecked(CHARLETH),
+					 get_from_secret::<AuraId>("//Charlie"),
+					 get_from_secret::<GrandpaId>("//Charlie")),
 				],
 				// Sudo account
-				AccountId::from(hex!("55D5E776997198679A8774507CaA4b0F7841767e")),
+				// AccountId::from(hex!("55D5E776997198679A8774507CaA4b0F7841767e")),
+				array_bytes::hex_n_into_unchecked(ALITH),
 				// Pre-funded accounts
 				vec![
 					array_bytes::hex_n_into_unchecked(ALITH),
 					array_bytes::hex_n_into_unchecked(BALTATHAR),
 					array_bytes::hex_n_into_unchecked(CHARLETH),
 					array_bytes::hex_n_into_unchecked(DOROTHY),
-					// AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")),
-					// AccountId::from(hex!("7ed8c8a0C4d1FeA01275fE13F0Ef23bce5CBF8C3")),
-					// AccountId::from(hex!("3263236Cbc327B5519E373CC591318e56e7c5081")),
-					// get_account_id_from_seed::<ecdsa::Public>("Alice"),
-					// get_account_id_from_seed::<ecdsa::Public>("Bob"),
-					// get_account_id_from_seed::<ecdsa::Public>("Charlie"),
-					// get_account_id_from_seed::<ecdsa::Public>("Dave"),
-					// get_account_id_from_seed::<ecdsa::Public>("Eve"),
-					// get_account_id_from_seed::<ecdsa::Public>("Ferdie"),
-					// get_account_id_from_seed::<ecdsa::Public>("Alice//stash"),
-					// get_account_id_from_seed::<ecdsa::Public>("Bob//stash"),
-					// get_account_id_from_seed::<ecdsa::Public>("Charlie//stash"),
-					// get_account_id_from_seed::<ecdsa::Public>("Dave//stash"),
-					// get_account_id_from_seed::<ecdsa::Public>("Eve//stash"),
-					// get_account_id_from_seed::<ecdsa::Public>("Ferdie//stash"),
 				],
 				true,
 			)
@@ -212,13 +201,7 @@ fn testnet_genesis(
 			balances: endowed_accounts.iter().cloned().map(|k| (k.clone(), ENDOWMENT / initial_authorities.len() as u128)).collect(),
 		},
 		aura: Default::default(),
-		// AuraConfig {
-		// 	authorities: initial_authorities.iter().map(|x| (x.0.clone())).collect(),
-		// },
 		grandpa: Default::default(),
-		// GrandpaConfig {
-		// 	authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect(),
-		// },
 		sudo: SudoConfig {
 			// Assign network admin rights.
 			key: Some(root_key),
@@ -241,19 +224,19 @@ fn testnet_genesis(
 		},
 		session: SessionConfig {
 			keys: initial_authorities
-				.iter()
-				.map(|x| {
+				.into_iter()
+				.map(|(acc, aura, gran)| {
 					(
-						x.0.clone(),
-						x.0.clone(),
+						acc.clone(),
+						acc,
 						session_keys(
-							x.1.clone(), x.2.clone(),
+							aura, gran,
 						),
 					)
 				})
 				.collect::<Vec<_>>(),
 		},
-		ethereum: EthereumConfig {},
+		ethereum: Default::default(),
 		base_fee: Default::default(),
 	}
 }

@@ -499,19 +499,25 @@ construct_runtime!(
 		NodeBlock = opaque::Block,
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
+		// System pallets
 		System: frame_system,
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip,
 		Timestamp: pallet_timestamp,
 
-		Aura: pallet_aura,
-		Grandpa: pallet_grandpa,
+		// Monetary stuff
 		Balances: pallet_balances,
 		TransactionPayment: pallet_transaction_payment,
+
+		// Consensus pallets
+		Authorship: pallet_authorship,
+		Session: pallet_session,
+		Aura: pallet_aura,
+		Grandpa: pallet_grandpa,
+
+		// Sudo
 		Sudo: pallet_sudo,
 
-		Session: pallet_session,
-		Authorship: pallet_authorship,
-
+		// Evm pallets
 		EVM: pallet_evm,
 		Ethereum: pallet_ethereum,
 		BaseFee: pallet_base_fee,
