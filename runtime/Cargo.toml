@@ -19,6 +19,7 @@ impl-serde = { workspace = true }
 libsecp256k1 = { workspace = true, features = ["hmac"] }
 log = "0.4.17"
 serde = "1.0.151"
+smallvec = "1.10.0"
 
 
 codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
@@ -34,6 +35,7 @@ pallet-sudo = { workspace = true }
 frame-system = { workspace = true }
 frame-try-runtime = { workspace = true, optional = true }
 pallet-timestamp = { workspace = true }
+pallet-treasury = { workspace = true }
 pallet-transaction-payment = { workspace = true }
 frame-executive = { workspace = true }
 sp-api = { workspace = true }
@@ -68,6 +70,10 @@ fp-self-contained = { workspace = true }
 fp-rpc = { workspace = true }
 pallet-base-fee = { workspace = true }
 
+# moonbeam
+xcm-primitives = { workspace = true }
+pallet-ethereum-xcm = { workspace = true }
+
 # Polkadot
 pallet-xcm = { workspace = true }
 polkadot-parachain = { workspace = true }
@@ -91,7 +97,7 @@ parachain-info = { workspace = true }
 
 
 [build-dependencies]
-substrate-wasm-builder = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.37" }
+substrate-wasm-builder = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.38" }
 
 [features]
 default = ["std"]
@@ -123,6 +129,7 @@ std = [
 	"pallet-base-fee/std",
 	"pallet-evm/std",
 	"pallet-ethereum/std",
+	"pallet-ethereum-xcm/std",
 	"pallet-randomness-collective-flip/std",
 	"pallet-sudo/std",
 	"pallet-timestamp/std",
