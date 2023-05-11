@@ -73,6 +73,7 @@ pallet-base-fee = { workspace = true }
 # moonbeam
 xcm-primitives = { workspace = true }
 pallet-ethereum-xcm = { workspace = true }
+moonbeam-evm-tracer = { workspace = true, optional = true }
 
 # Polkadot
 pallet-xcm = { workspace = true }
@@ -102,6 +103,7 @@ substrate-wasm-builder = { git = "https://github.com/paritytech/substrate.git", 
 [features]
 default = ["std"]
 std = [
+	# cumulus
 	"cumulus-pallet-aura-ext/std",
 	"cumulus-pallet-dmp-queue/std",
 	"cumulus-pallet-parachain-system/std",
@@ -110,6 +112,12 @@ std = [
 	"cumulus-primitives-core/std",
 	"cumulus-primitives-timestamp/std",
 	"cumulus-primitives-utility/std",
+
+	# moonbeam
+	"moonbeam-evm-tracer/std",
+	"pallet-ethereum-xcm/std",
+	"xcm-primitives/std",
+
 	"serde/std",
 	"frame-try-runtime?/std",
 	"frame-system-benchmarking?/std",
@@ -155,7 +163,27 @@ std = [
 	"xcm-executor/std",
 	"xcm/std",
 ]
+
+evm-tracing = [
+	# moonbeam
+	"moonbeam-evm-tracer"
+]
+
+fast-runtime = []
+
+# A feature that should be enabled when the runtime should be build for on-chain
+# deployment. This will disable stuff that shouldn't be part of the on-chain wasm
+# to make it smaller like logging for example.
+on-chain-release-build = [
+	# substrate
+	"sp-api/disable-logging",
+]
+
+
 runtime-benchmarks = [
+	# moonbeam
+	"pallet-ethereum-xcm/runtime-benchmarks",
+	"xcm-primitives/runtime-benchmarks",
 	# cumulus
 	"cumulus-pallet-parachain-system/runtime-benchmarks",
 	"cumulus-pallet-xcmp-queue/runtime-benchmarks",
@@ -168,15 +196,12 @@ runtime-benchmarks = [
 	"pallet-balances/runtime-benchmarks",
 	"pallet-timestamp/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
-
 	# polkadot
 	"pallet-xcm/runtime-benchmarks",
 	"polkadot-parachain/runtime-benchmarks",
 	"polkadot-runtime-common/runtime-benchmarks",
 	"xcm-builder/runtime-benchmarks",
 	"xcm-executor/runtime-benchmarks",
-
-
 ]
 try-runtime = [
 	# cumulus
@@ -186,7 +211,6 @@ try-runtime = [
 	"cumulus-pallet-xcm/try-runtime",
 	"cumulus-pallet-xcmp-queue/try-runtime",
 	"parachain-info/try-runtime",
-
 	"frame-try-runtime/try-runtime",
 	"frame-executive/try-runtime",
 	"frame-system/try-runtime",
@@ -197,7 +221,6 @@ try-runtime = [
 	"pallet-sudo/try-runtime",
 	"pallet-timestamp/try-runtime",
 	"pallet-transaction-payment/try-runtime",
-
 	# polkadot
 	"pallet-xcm/try-runtime",
 	"polkadot-runtime-common/try-runtime",

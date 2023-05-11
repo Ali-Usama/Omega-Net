@@ -62,10 +62,13 @@ frame-benchmarking = { workspace = true }
 frame-benchmarking-cli = { workspace = true }
 
 # Local Dependencies
-storage-chain-runtime = { path = "../runtime" }
+storage-chain-runtime = { path = "../runtime", optional = true }
 
 # CLI-specific dependencies
 try-runtime-cli = { optional = true, workspace = true }
+
+# moonbeam
+moonbeam-primitives-ext       = { workspace = true, optional = true, features = ["std"] }
 
 # Evm dependencies
 fp-evm = { workspace = true }
@@ -81,7 +84,7 @@ fc-db = { workspace = true }
 sc-network = { workspace = true }
 
 [build-dependencies]
-substrate-build-script-utils = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.37" }
+substrate-build-script-utils = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.38" }
 
 [features]
 default = []
@@ -94,3 +97,11 @@ runtime-benchmarks = [
 # Enable features that allow the runtime to be tried and debugged. Name might be subject to change
 # in the near future.
 try-runtime = ["storage-chain-runtime/try-runtime", "try-runtime-cli"]
+
+evm-tracing = [
+	# storage-chain
+	"storage-chain-runtime?/evm-tracing",
+
+	# moonbeam
+	"moonbeam-primitives-ext",
+]

@@ -2198,6 +2198,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "evm-tracing-events"
+version = "0.1.0"
+source = "git+https://github.com/darwinia-network/moonbeam?branch=update-0.9.38#abca6696c3731dd781d7badfb7cd797e36e39bf5"
+dependencies = [
+ "environmental",
+ "ethereum",
+ "ethereum-types",
+ "evm",
+ "evm-gasometer",
+ "evm-runtime",
+ "parity-scale-codec",
+ "sp-runtime-interface",
+]
+
+[[package]]
 name = "exit-future"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4737,6 +4752,39 @@ dependencies = [
 ]
 
 [[package]]
+name = "moonbeam-evm-tracer"
+version = "0.1.0"
+source = "git+https://github.com/darwinia-network/moonbeam?branch=update-0.9.38#abca6696c3731dd781d7badfb7cd797e36e39bf5"
+dependencies = [
+ "ethereum-types",
+ "evm",
+ "evm-gasometer",
+ "evm-runtime",
+ "evm-tracing-events",
+ "fp-evm",
+ "moonbeam-primitives-ext",
+ "pallet-evm",
+ "parity-scale-codec",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "moonbeam-primitives-ext"
+version = "0.1.0"
+source = "git+https://github.com/darwinia-network/moonbeam?branch=update-0.9.38#abca6696c3731dd781d7badfb7cd797e36e39bf5"
+dependencies = [
+ "ethereum-types",
+ "evm-tracing-events",
+ "parity-scale-codec",
+ "sp-externalities",
+ "sp-runtime-interface",
+ "sp-std",
+]
+
+[[package]]
 name = "multiaddr"
 version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5540,6 +5588,7 @@ dependencies = [
  "fp-evm",
  "fp-rpc",
  "fp-self-contained",
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
  "pallet-evm",
@@ -9506,6 +9555,7 @@ dependencies = [
  "hex-literal 0.4.1",
  "jsonrpsee",
  "libsecp256k1",
+ "moonbeam-primitives-ext",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc",
  "sc-basic-authorship",
@@ -9567,6 +9617,7 @@ dependencies = [
  "impl-serde",
  "libsecp256k1",
  "log",
+ "moonbeam-evm-tracer",
  "pallet-aura",
  "pallet-authorship",
  "pallet-balances",
@@ -9676,7 +9727,7 @@ dependencies = [
 [[package]]
 name = "substrate-build-script-utils"
 version = "3.0.0"
-source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.37#f38bd6671d460293c93062cc1e4fe9e9e490cb29"
+source = "git+https://github.com/paritytech/substrate.git?branch=polkadot-v0.9.38#bcff60a227d455d95b4712b6cb356ce56b1ff672"
 dependencies = [
  "platforms 2.0.0",
 ]
@@ -11652,6 +11703,7 @@ dependencies = [
  "cumulus-primitives-core",
  "ethereum",
  "ethereum-types",
+ "frame-benchmarking",
  "frame-support",
  "frame-system",
  "hex",

@@ -16,9 +16,9 @@ use fc_consensus::FrontierBlockImport;
 use futures::StreamExt;
 
 // Our native executor instance.
-pub struct ExecutorDispatch;
+pub struct StorageRuntimeExecutor;
 
-impl sc_executor::NativeExecutionDispatch for ExecutorDispatch {
+impl sc_executor::NativeExecutionDispatch for StorageRuntimeExecutor {
 	/// Only enable the benchmarking host functions when we actually want to benchmark.
 	#[cfg(feature = "runtime-benchmarks")]
 	type ExtendHostFunctions = frame_benchmarking::benchmarking::HostFunctions;
@@ -36,7 +36,7 @@ impl sc_executor::NativeExecutionDispatch for ExecutorDispatch {
 }
 
 pub(crate) type FullClient =
-sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<ExecutorDispatch>>;
+sc_service::TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<StorageRuntimeExecutor>>;
 type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 
@@ -113,7 +113,7 @@ pub fn new_partial(
 		})
 		.transpose()?;
 
-	let executor = NativeElseWasmExecutor::<ExecutorDispatch>::new(
+	let executor = NativeElseWasmExecutor::<StorageRuntimeExecutor>::new(
 		config.wasm_method,
 		config.default_heap_pages,
 		config.max_runtime_instances,
