@@ -50,7 +50,7 @@ pub use frame_support::{
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_REF_TIME_PER_SECOND},
 		IdentityFee, Weight, WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
 	},
-	StorageValue,
+	StorageValue, PalletId
 };
 pub use frame_system::Call as SystemCall;
 use frame_system::EnsureRoot;
@@ -274,7 +274,7 @@ impl pallet_timestamp::Config for Runtime {
 }
 
 /// Existential deposit.
-pub const EXISTENTIAL_DEPOSIT: u128 = 1 * currency::KILOWEI;
+pub const EXISTENTIAL_DEPOSIT: u128 = 1 * currency::MICROSTOR;
 
 impl pallet_balances::Config for Runtime {
 	/// The type for recording an account's balance.
@@ -592,6 +592,35 @@ impl pallet_ethereum_xcm::Config for Runtime {
 	type ControllerOrigin = EnsureRoot<AccountId>;
 }
 
+use xcm::latest::prelude::BodyId;
+parameter_types! {
+	pub const PotId: PalletId = PalletId(*b"PotStake");
+	pub const MaxCandidates: u32 = 1000;
+	pub const MinCandidates: u32 = 5;
+	pub const SessionLength: BlockNumber = 6 * HOURS;
+	pub const MaxInvulnerables: u32 = 100;
+	pub const ExecutiveBody: BodyId = BodyId::Executive;
+}
+
+// We allow root only to execute privileged collator selection operations.
+pub type CollatorSelectionUpdateOrigin = EnsureRoot<AccountId>;
+
+impl pallet_collator_selection::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type UpdateOrigin = CollatorSelectionUpdateOrigin;
+	type PotId = PotId;
+	type MaxCandidates = MaxCandidates;
+	type MinCandidates = MinCandidates;
+	type MaxInvulnerables = MaxInvulnerables;
+	// should be a multiple of session or things will get inconsistent
+	type KickThreshold = Period;
+	type ValidatorId = <Self as frame_system::Config>::AccountId;
+	type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
+	type ValidatorRegistration = Session;
+	type WeightInfo = ();
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub struct Runtime
@@ -600,18 +629,27 @@ construct_runtime!(
 		NodeBlock = opaque::Block,
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
+		// System support
 		System: frame_system,
 		ParachainSystem: cumulus_pallet_parachain_system,
 		RandomnessCollectiveFlip: pallet_randomness_collective_flip,
 		Timestamp: pallet_timestamp,
 		ParachainInfo: parachain_info,
 
-		Aura: pallet_aura,
-		AuraExt: cumulus_pallet_aura_ext,
+		// Monetary pallets
 		Balances: pallet_balances,
 		TransactionPayment: pallet_transaction_payment,
-		Sudo: pallet_sudo,
 		Treasury: pallet_treasury,
+
+		// Collator support. The order of these 4 are important and shall not change.
+		Authorship: pallet_authorship,
+		CollatorSelection: pallet_collator_selection,
+		Session: pallet_session,
+		Aura: pallet_aura,
+		AuraExt: cumulus_pallet_aura_ext,
+
+		// Sudo authority (will be removed in future updates)
+		Sudo: pallet_sudo,
 
 		// XCM helpers.
 		XcmpQueue: cumulus_pallet_xcmp_queue,
@@ -620,9 +658,7 @@ construct_runtime!(
 		DmpQueue: cumulus_pallet_dmp_queue,
 		EthereumXcm: pallet_ethereum_xcm,
 
-		Session: pallet_session,
-		Authorship: pallet_authorship,
-
+		// Evm pallets
 		EVM: pallet_evm,
 		Ethereum: pallet_ethereum,
 		BaseFee: pallet_base_fee,

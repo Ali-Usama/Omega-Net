@@ -21,7 +21,11 @@ clap = { workspace = true, features = ["derive"] }
 libsecp256k1 = { workspace = true, features = [ "hmac" ] }
 sha3 = { workspace = true }
 array-bytes = "6.0.0"
+hex-literal = "0.4.1"
+futures = "0.3.25"
+serde = { workspace = true }
 
+sc-chain-spec = { workspace = true }
 sc-cli = { workspace = true }
 sp-core = { workspace = true }
 sc-executor = { workspace = true }
@@ -43,8 +47,6 @@ sp-inherents = { workspace = true }
 sp-keyring = { workspace = true }
 frame-system = { workspace = true }
 pallet-transaction-payment = { workspace = true }
-hex-literal = "0.4.1"
-futures = "0.3.25"
 
 # These dependencies are used for the node template's RPCs
 jsonrpsee = { version = "0.16", features = [ "macros", "server" ] }
@@ -62,13 +64,27 @@ frame-benchmarking = { workspace = true }
 frame-benchmarking-cli = { workspace = true }
 
 # Local Dependencies
-storage-chain-runtime = { path = "../runtime", optional = true }
+storage-chain-runtime = { workspace = true }
 
 # CLI-specific dependencies
 try-runtime-cli = { optional = true, workspace = true }
 
 # moonbeam
 moonbeam-primitives-ext       = { workspace = true, optional = true, features = ["std"] }
+
+# polkadot
+xcm = { workspace = true, features = ["std"]}
+polkadot-cli = { workspace = true }
+
+# cumulus
+cumulus-client-cli                    = { workspace = true }
+cumulus-client-consensus-aura         = { workspace = true }
+cumulus-client-consensus-common       = { workspace = true }
+cumulus-client-network                = { workspace = true }
+cumulus-client-service                = { workspace = true }
+cumulus-primitives-core               = { workspace = true, features = ["std"] }
+cumulus-primitives-parachain-inherent = { workspace = true, features = ["std"] }
+cumulus-relay-chain-interface         = { workspace = true }
 
 # Evm dependencies
 fp-evm = { workspace = true }
@@ -98,10 +114,10 @@ runtime-benchmarks = [
 # in the near future.
 try-runtime = ["storage-chain-runtime/try-runtime", "try-runtime-cli"]
 
-evm-tracing = [
-	# storage-chain
-	"storage-chain-runtime?/evm-tracing",
-
-	# moonbeam
-	"moonbeam-primitives-ext",
-]
+#evm-tracing = [
+#	# storage-chain
+#	"storage-chain-runtime?/evm-tracing",
+#
+#	# moonbeam
+#	"moonbeam-primitives-ext",
+#]

@@ -112,6 +112,7 @@ std = [
 	"cumulus-primitives-core/std",
 	"cumulus-primitives-timestamp/std",
 	"cumulus-primitives-utility/std",
+	"pallet-collator-selection/std",
 
 	# moonbeam
 	"moonbeam-evm-tracer/std",
