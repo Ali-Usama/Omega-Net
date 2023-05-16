@@ -82,6 +82,9 @@ pub type Index = u32;
 /// A hash of some data used by the chain.
 pub type Hash = H256;
 
+/// Hashing type
+pub type Hashing = BlakeTwo256;
+
 pub mod currency {
 	use super::Balance;
 
