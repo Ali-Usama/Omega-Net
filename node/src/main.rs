@@ -9,6 +9,7 @@ mod cli;
 mod command;
 mod rpc;
 mod frontier_service;
+mod instant_finalize;
 
 fn main() -> sc_cli::Result<()> {
 	command::run()

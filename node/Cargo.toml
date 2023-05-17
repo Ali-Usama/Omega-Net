@@ -2,12 +2,12 @@
 name = "storage-chain"
 version = "4.0.0-dev"
 description = "A fresh FRAME-based Substrate node, ready for hacking."
-authors = ["Usama Ali", "Asad Ali"]
+authors = { workspace = true }
 homepage = "https://substrate.io/"
 edition = "2021"
 license = "Unlicense"
 publish = false
-repository = "https://github.com/substrate-developer-hub/substrate-storage-chain/"
+repository = { workspace = true }
 build = "build.rs"
 
 [package.metadata.docs.rs]
@@ -17,44 +17,54 @@ targets = ["x86_64-unknown-linux-gnu"]
 name = "storage-chain"
 
 [dependencies]
+log = "0.4"
 clap = { workspace = true, features = ["derive"] }
 libsecp256k1 = { workspace = true, features = [ "hmac" ] }
 sha3 = { workspace = true }
-array-bytes = "6.0.0"
-hex-literal = "0.4.1"
-futures = "0.3.25"
+array-bytes = { version = "6.0.0" }
+hex-literal = { version = "0.4.1" }
+futures = { version = "0.3.25" }
+tokio = { version = "1.25" }
+async-trait = { version = "0.1" }
 serde = { workspace = true }
 
 sc-chain-spec = { workspace = true }
 sc-cli = { workspace = true }
-sp-core = { workspace = true }
+sc-tracing = { workspace = true }
+sc-sysinfo = { workspace = true }
+sp-core = { workspace = true, features = ["std"] }
 sc-executor = { workspace = true }
 sc-service = { workspace = true }
 sc-telemetry = { workspace = true }
 sc-keystore = { workspace = true }
+sp-keystore = { workspace = true }
 sc-transaction-pool = { workspace = true }
 sc-transaction-pool-api = { workspace = true }
 sc-consensus-aura = { workspace = true }
-sp-consensus-aura = { workspace = true }
+sp-consensus-aura = { workspace = true, features = ["std"] }
 sp-consensus = { workspace = true }
 sc-consensus = { workspace = true }
 sc-finality-grandpa = { workspace = true }
 sp-finality-grandpa = { workspace = true }
 sc-client-api = { workspace = true }
-sp-runtime = { workspace = true }
-sp-timestamp = { workspace = true }
+sp-runtime = { workspace = true, features = ["std"] }
+sp-offchain = { workspace = true, features = ["std"] }
+sp-session = { workspace = true, features = ["std"] }
+sp-transaction-pool = { workspace = true, features = ["std"] }
+sp-timestamp = { workspace = true, features = ["std"] }
 sp-inherents = { workspace = true }
 sp-keyring = { workspace = true }
 frame-system = { workspace = true }
 pallet-transaction-payment = { workspace = true }
+substrate-prometheus-endpoint = { workspace = true }
 
 # These dependencies are used for the node template's RPCs
 jsonrpsee = { version = "0.16", features = [ "macros", "server" ] }
 sc-rpc = { workspace = true }
-sp-api = { workspace = true }
+sp-api = { workspace = true, features = ["std"] }
 sc-rpc-api = { workspace = true }
 sp-blockchain = { workspace = true }
-sp-block-builder = { workspace = true }
+sp-block-builder = { workspace = true, features = ["std"] }
 sc-basic-authorship = { workspace = true }
 substrate-frame-rpc-system = { workspace = true }
 pallet-transaction-payment-rpc = { workspace = true }
@@ -90,8 +100,8 @@ cumulus-primitives-parachain-inherent = { workspace = true, features = ["std"] }
 cumulus-relay-chain-interface         = { workspace = true }
 
 # Evm dependencies
-fp-evm = { workspace = true }
-fp-rpc = { workspace = true }
+fp-evm = { workspace = true, features = ["std"]}
+fp-rpc = { workspace = true, features = ["std"] }
 fp-storage = { workspace = true }
 fp-dynamic-fee = { workspace = true }
 fc-rpc = { workspace = true}
@@ -100,6 +110,7 @@ fp-consensus = { workspace = true }
 fc-rpc-core = { workspace = true }
 fc-mapping-sync = { workspace = true }
 fc-db = { workspace = true }
+fc-storage = { workspace = true }
 sc-network = { workspace = true }
 
 [build-dependencies]
