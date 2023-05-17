@@ -2668,6 +2668,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "fc-cli"
+version = "1.0.0-dev"
+source = "git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.38#5644279da588baab7caa9f3a4eb69363e1606461"
+dependencies = [
+ "clap",
+ "ethereum-types",
+ "fc-db",
+ "fp-rpc",
+ "fp-storage",
+ "sc-cli",
+ "serde",
+ "serde_json",
+ "sp-api",
+ "sp-blockchain",
+ "sp-runtime",
+]
+
+[[package]]
 name = "fc-consensus"
 version = "2.0.0-dev"
 source = "git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.38#5644279da588baab7caa9f3a4eb69363e1606461"
@@ -11660,6 +11678,7 @@ dependencies = [
  "cumulus-primitives-core",
  "cumulus-primitives-parachain-inherent",
  "cumulus-relay-chain-interface",
+ "fc-cli",
  "fc-consensus",
  "fc-db",
  "fc-mapping-sync",
@@ -11685,7 +11704,9 @@ dependencies = [
  "moonbeam-rpc-trace",
  "pallet-transaction-payment",
  "pallet-transaction-payment-rpc",
+ "parity-scale-codec",
  "polkadot-cli",
+ "polkadot-primitives",
  "sc-basic-authorship",
  "sc-chain-spec",
  "sc-cli",

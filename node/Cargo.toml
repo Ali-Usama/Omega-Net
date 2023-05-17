@@ -27,6 +27,7 @@ futures = { version = "0.3.25" }
 tokio = { version = "1.25" }
 async-trait = { version = "0.1" }
 serde = { workspace = true }
+codec = { workspace = true, package = "parity-scale-codec" }
 
 sc-chain-spec = { workspace = true }
 sc-cli = { workspace = true }
@@ -88,6 +89,7 @@ moonbeam-rpc-trace = { workspace = true }
 # polkadot
 xcm = { workspace = true, features = ["std"]}
 polkadot-cli = { workspace = true }
+polkadot-primitives = { workspace = true }
 
 # cumulus
 cumulus-client-cli                    = { workspace = true }
@@ -105,6 +107,7 @@ fp-rpc = { workspace = true, features = ["std"] }
 fp-storage = { workspace = true }
 fp-dynamic-fee = { workspace = true }
 fc-rpc = { workspace = true}
+fc-cli = { workspace = true}
 fc-consensus = { workspace = true }
 fp-consensus = { workspace = true }
 fc-rpc-core = { workspace = true }

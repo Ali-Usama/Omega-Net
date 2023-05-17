@@ -29,7 +29,7 @@ hex-literal = "0.4"
 futures = "0.3.25"
 
 
-codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false }
+codec = { package = "parity-scale-codec", version = "3.5", default-features = false }
 scale-info = { version = "2.3.0", default-features = false }
 
 pallet-aura = { default-features = false, git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.38" }
@@ -91,6 +91,7 @@ moonbeam-rpc-trace = { git = "https://github.com/darwinia-network/moonbeam", bra
 # Polkadot
 pallet-xcm = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.38" }
 polkadot-cli = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.38" }
+polkadot-primitives = { git = "https://github.com/paritytech/polkadot", branch = "release-v0.9.38" }
 polkadot-parachain = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.38" }
 polkadot-runtime-common = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.38" }
 xcm = { git = "https://github.com/paritytech/polkadot", default-features = false, branch = "release-v0.9.38" }
@@ -164,6 +165,7 @@ try-runtime-cli = { git = "https://github.com/paritytech/substrate.git", branch 
 fp-storage = { git = "https://github.com/paritytech/frontier", branch = "polkadot-v0.9.38" }
 fp-dynamic-fee = { git = "https://github.com/paritytech/frontier", branch = "polkadot-v0.9.38" }
 fc-rpc = { git = "https://github.com/paritytech/frontier", branch = "polkadot-v0.9.38" }
+fc-cli = { git = "https://github.com/paritytech/frontier", branch = "polkadot-v0.9.38" }
 fc-consensus = { git = "https://github.com/paritytech/frontier", branch = "polkadot-v0.9.38" }
 fp-consensus = { git = "https://github.com/paritytech/frontier", branch = "polkadot-v0.9.38" }
 fc-rpc-core = { git = "https://github.com/paritytech/frontier", branch = "polkadot-v0.9.38" }

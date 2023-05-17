@@ -17,7 +17,7 @@ use moonbeam_rpc_trace::{CacheRequester as TraceFilterCacheRequester, CacheTask}
 // substrate
 use sc_cli::SubstrateCli;
 use sc_service::{BasePath, Configuration, TaskManager};
-// runtime
+// local
 use storage_chain_runtime::{BlockNumber, Hash, Hashing };
 use crate::cli::Cli;
 
@@ -160,7 +160,7 @@ pub(crate) fn db_config_dir(config: &Configuration) -> PathBuf {
 		.as_ref()
 		.map(|base_path| base_path.config_dir(config.chain_spec.id()))
 		.unwrap_or_else(|| {
-			BasePath::from_project("", "", &Cli::executable_name())
+			BasePath::from_project("", "", "storage-chain")
 				.config_dir(config.chain_spec.id())
 		})
 }
