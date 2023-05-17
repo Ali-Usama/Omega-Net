@@ -83,7 +83,7 @@ try-runtime-cli = { optional = true, workspace = true }
 # moonbeam
 moonbeam-primitives-ext       = { workspace = true, optional = true, features = ["std"] }
 moonbeam-rpc-debug = { workspace = true }
-moonbeam-rpc-primitives-debug = { workspace = true }
+moonbeam-rpc-primitives-debug = { workspace = true, features = ["std"] }
 moonbeam-rpc-trace = { workspace = true }
 
 # polkadot

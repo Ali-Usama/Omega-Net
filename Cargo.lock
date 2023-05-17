@@ -11778,6 +11778,7 @@ dependencies = [
  "libsecp256k1",
  "log",
  "moonbeam-evm-tracer",
+ "moonbeam-rpc-primitives-debug",
  "pallet-aura",
  "pallet-authorship",
  "pallet-balances",

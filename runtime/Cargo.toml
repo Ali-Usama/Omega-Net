@@ -74,6 +74,7 @@ pallet-base-fee = { workspace = true }
 xcm-primitives = { workspace = true }
 pallet-ethereum-xcm = { workspace = true }
 moonbeam-evm-tracer = { workspace = true, optional = true }
+moonbeam-rpc-primitives-debug = { workspace = true }
 
 # Polkadot
 pallet-xcm = { workspace = true }
