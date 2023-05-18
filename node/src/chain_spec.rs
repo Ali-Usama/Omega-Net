@@ -128,14 +128,15 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 				// Initial PoA authorities
 				vec![
 					(array_bytes::hex_n_into_unchecked(ALITH),
-					 get_collator_keys_from_seed("Alice"),
-					 ),
+					 get_collator_keys_from_seed("Alice")),
 					(array_bytes::hex_n_into_unchecked(BALTATHAR),
-					 get_collator_keys_from_seed("Bob"),
-					 ),
+					 get_collator_keys_from_seed("Bob")),
+					(array_bytes::hex_n_into_unchecked(CHARLETH),
+					 get_collator_keys_from_seed("Charlie")),
 				],
 				// Sudo account
-				AccountId::from(hex!("55D5E776997198679A8774507CaA4b0F7841767e")),
+				// AccountId::from(hex!("55D5E776997198679A8774507CaA4b0F7841767e")),
+				array_bytes::hex_n_into_unchecked(ALITH),
 				// Pre-funded accounts
 				vec![
 					array_bytes::hex_n_into_unchecked(ALITH),
