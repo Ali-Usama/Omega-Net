@@ -1,45 +1,33 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
 // local
-use storage_chain_runtime::{self, opaque::Block, RuntimeApi, Balance, AccountId, Nonce, Hash};
+use storage_chain_runtime::{self, opaque::Block, Balance, AccountId, Nonce, Hash};
 use crate::frontier_service::{TracingApi, spawn_frontier_tasks, db_config_dir};
 // substrate
 use sc_consensus::ImportQueue;
-use sc_client_api::{BlockBackend, BlockchainEvents};
-use sc_consensus_aura::{
-	CompatibilityMode, ImportQueueParams, StartAuraParams,
-};
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 pub use sc_executor::NativeElseWasmExecutor;
 use sp_runtime::app_crypto::AppKey;
 use sp_core::Pair;
 use sc_keystore::LocalKeystore;
-use sc_service::{error::Error as ServiceError, Configuration, TaskManager, BasePath};
+use sc_service::{error::Error as ServiceError, Configuration, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker, TelemetryWorkerHandle, TelemetryHandle};
-use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
 use sp_keystore::SyncCryptoStorePtr;
 use substrate_prometheus_endpoint::Registry;
 use sc_network::NetworkService;
 // std
-use std::{future, sync::{Arc, Mutex}, time::Duration, collections::BTreeMap};
-use futures::StreamExt;
+use std::{sync::{Arc, Mutex}, time::Duration, collections::BTreeMap};
 // frontier
-use fc_mapping_sync::{MappingSyncWorker, SyncStrategy};
 use fc_rpc_core::types::{FeeHistoryCache, FeeHistoryCacheLimit};
-use fc_consensus::FrontierBlockImport;
 use sc_network::NetworkBlock;
 // cumulus
 use cumulus_client_consensus_aura::{AuraConsensus, BuildAuraConsensusParams, SlotProportion};
-use cumulus_client_consensus_common::{
-	ParachainBlockImport as TParachainBlockImport, ParachainConsensus,
-};
-use cumulus_client_network::BlockAnnounceValidator;
+use cumulus_client_consensus_common::ParachainConsensus;
 use cumulus_client_service::{
-	build_relay_chain_interface, prepare_node_config, start_collator, start_full_node,
-	StartCollatorParams, StartFullNodeParams,
+	start_collator, start_full_node, StartCollatorParams,
 };
 use cumulus_primitives_core::ParaId;
-use cumulus_relay_chain_interface::{RelayChainError, RelayChainInterface};
+use cumulus_relay_chain_interface::RelayChainInterface;
 
 // Our native executor instance.
 pub struct StorageRuntimeExecutor;
@@ -184,7 +172,7 @@ pub fn new_partial<RuntimeApi, Executor>(
 		client.clone(),
 		block_import.clone(),
 		config,
-		telemetry.as_ref().map(|(telemetry)| telemetry.handle()),
+		telemetry.as_ref().map(|telemetry| telemetry.handle()),
 		&task_manager,
 	)?;
 
@@ -300,7 +288,7 @@ async fn start_node_impl<RuntimeApi, Executor, RB>(
 		mut task_manager,
 		import_queue,
 		mut keystore_container,
-		select_chain,
+		select_chain: _,
 		transaction_pool,
 		other: (
 			frontier_backend,

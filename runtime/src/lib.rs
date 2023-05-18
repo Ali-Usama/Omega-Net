@@ -6,7 +6,6 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
-use codec::{Encode, Decode};
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 use smallvec::smallvec;
 use sp_api::impl_runtime_apis;
@@ -189,7 +188,6 @@ mod account;
 mod xcm_config;
 
 use precompiles::SubstratePrecompiles;
-use account::AccountId20;
 use xcm_config::{XcmConfig, XcmOriginToTransactDispatchOrigin};
 
 parameter_types! {

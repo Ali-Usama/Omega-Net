@@ -13,18 +13,15 @@ use frame_support::{
 };
 use sp_runtime::traits::Zero;
 use pallet_xcm::XcmPassthrough;
-use polkadot_parachain::primitives::Sibling;
-use polkadot_runtime_common::impls::ToAuthor;
 use sp_core::{ConstU32, Get};
 use sp_io::hashing::blake2_256;
 use sp_runtime::{SaturatedConversion, Saturating};
 use xcm::latest::{prelude::*, Weight as XcmWeight};
 use xcm_builder::{
-	AccountId32Aliases, AllowTopLevelPaidExecutionFrom, AllowUnpaidExecutionFrom, CurrencyAdapter,
+	AllowTopLevelPaidExecutionFrom, AllowUnpaidExecutionFrom, CurrencyAdapter,
 	EnsureXcmOrigin, FixedWeightBounds, IsConcrete, NativeAsset, ParentIsPreset,
 	RelayChainAsNative, SiblingParachainAsNative, SiblingParachainConvertsVia,
-	SignedAccountId32AsNative, SignedToAccountId32, SovereignSignedViaLocation, TakeWeightCredit,
-	UsingComponents, TakeRevenue,
+	SovereignSignedViaLocation, TakeWeightCredit, TakeRevenue,
 };
 use xcm_executor::{
 	traits::{Convert, ShouldExecute, WeightTrader},

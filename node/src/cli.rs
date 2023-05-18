@@ -1,6 +1,6 @@
 use cumulus_client_cli::RunCmd;
 // std
-use std::{path::PathBuf, str::FromStr};
+use std::{path::PathBuf};
 
 
 #[derive(Debug, clap::Parser)]
@@ -10,10 +10,10 @@ use std::{path::PathBuf, str::FromStr};
 	subcommand_negates_reqs = true
 )]
 pub struct Cli {
-	#[clap(subcommand)]
+	#[command(subcommand)]
 	pub subcommand: Option<Subcommand>,
 
-	#[clap(flatten)]
+	#[command(flatten)]
 	pub run: RunCmd,
 
 	/// Disable automatic hardware benchmarks.
@@ -37,7 +37,7 @@ pub struct Cli {
 #[derive(Debug, clap::Subcommand)]
 pub enum Subcommand {
 	/// Key management cli utilities
-	#[clap(subcommand)]
+	#[command(subcommand)]
 	Key(sc_cli::KeySubcommand),
 
 	/// Build a chain specification.

@@ -7,9 +7,8 @@
 
 // std
 use std::sync::Arc;
-use std::collections::BTreeMap;
 // local
-use storage_chain_runtime::{opaque::Block, AccountId, Balance, Index, Hash, Hashing, Nonce};
+use storage_chain_runtime::{opaque::Block, AccountId, Balance, Hash, Hashing, Nonce};
 // substrate
 use sc_client_api::{backend::{Backend, StorageProvider, StateBackend},
 					client::BlockchainEvents,
@@ -20,14 +19,10 @@ use sc_transaction_pool_api::TransactionPool;
 pub use sc_rpc_api::DenyUnsafe;
 use sp_api::ProvideRuntimeApi;
 use sp_block_builder::BlockBuilder;
-use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
+use sp_blockchain::{ HeaderBackend, HeaderMetadata};
 // frontier
-use fc_rpc::{
-	EthBlockDataCacheTask, OverrideHandle, RuntimeApiStorageOverride, SchemaV1Override,
-	SchemaV2Override, SchemaV3Override, StorageOverride,
-};
+use fc_rpc::EthBlockDataCacheTask;
 use fc_rpc_core::types::{FeeHistoryCache, FeeHistoryCacheLimit};
-use fp_storage::EthereumStorageSchema;
 // moonbeam
 use moonbeam_rpc_debug::{Debug, DebugServer};
 use moonbeam_rpc_trace::{Trace, TraceServer};
@@ -38,7 +33,9 @@ pub type RpcExtension = jsonrpsee::RpcModule<()>;
 
 /// EVM tracing rpc server config
 pub struct TracingConfig {
+	/// Debug or Trace
 	pub tracing_requesters: crate::frontier_service::RpcRequesters,
+	/// Tracing max count
 	pub trace_filter_max_count: u32,
 }
 

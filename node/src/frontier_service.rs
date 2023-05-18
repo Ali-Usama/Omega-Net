@@ -15,11 +15,9 @@ use fc_rpc_core::types::{FeeHistoryCache, FeeHistoryCacheLimit, FilterPool};
 use moonbeam_rpc_debug::{DebugHandler, DebugRequester};
 use moonbeam_rpc_trace::{CacheRequester as TraceFilterCacheRequester, CacheTask};
 // substrate
-use sc_cli::SubstrateCli;
 use sc_service::{BasePath, Configuration, TaskManager};
 // local
 use storage_chain_runtime::{BlockNumber, Hash, Hashing };
-use crate::cli::Cli;
 
 #[derive(Clone)]
 pub struct RpcRequesters {

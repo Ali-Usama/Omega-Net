@@ -8,18 +8,16 @@ use crate::{
 };
 use storage_chain_runtime::{opaque::Block, RuntimeApi as StorageRuntimeApi};
 // std
-use std::{env, net::SocketAddr, path::PathBuf};
+use std::{env, net::SocketAddr};
 use codec::Encode;
 use log::{info, warn};
-// frame
-use frame_benchmarking_cli::{BenchmarkCmd, SUBSTRATE_REFERENCE_HARDWARE};
 // substrate
 use sc_cli::{
 	RuntimeVersion, SubstrateCli, Result, DefaultConfigurationValues, ImportParams, KeystoreParams,
 	NetworkParams, SharedParams, CliConfiguration,
 };
 use sc_service::{PartialComponents, DatabaseSource, config::{BasePath, PrometheusConfig}, ChainSpec};
-use sp_core::{crypto::Ss58AddressFormatRegistry, hexdisplay::HexDisplay};
+use sp_core::hexdisplay::HexDisplay;
 use sp_runtime::traits::{AccountIdConversion, Block as BlockT};
 // frontier
 use fc_db::frontier_database_dir;

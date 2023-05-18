@@ -95,7 +95,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
 					AccountId::from(hex!("7ed8c8a0C4d1FeA01275fE13F0Ef23bce5CBF8C3")),
 					AccountId::from(hex!("3263236Cbc327B5519E373CC591318e56e7c5081")),
 				],
-				2069.into(),
+				2000.into(),
 			)
 		},
 		// Bootnodes
@@ -110,7 +110,7 @@ pub fn development_config() -> Result<ChainSpec, String> {
 		// Extensions
 		Extensions {
 			relay_chain: "rococo-local".into(),
-			para_id: 2069
+			para_id: 2000
 		},
 	))
 }
@@ -143,7 +143,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 					array_bytes::hex_n_into_unchecked(CHARLETH),
 					array_bytes::hex_n_into_unchecked(DOROTHY),
 				],
-				2069.into(),
+				2000.into(),
 			)
 		},
 		// Bootnodes
@@ -158,7 +158,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 		// Extensions
 		Extensions {
 			relay_chain: "rococo-local".into(),
-			para_id: 2069,
+			para_id: 2000,
 		},
 	))
 }
