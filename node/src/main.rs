@@ -8,6 +8,7 @@ mod benchmarking;
 mod cli;
 mod command;
 mod rpc;
+mod frontier_service;
 
 fn main() -> sc_cli::Result<()> {
 	command::run()

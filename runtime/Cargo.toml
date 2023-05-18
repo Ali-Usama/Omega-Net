@@ -7,7 +7,7 @@ homepage = "https://substrate.io/"
 edition = "2021"
 license = "Unlicense"
 publish = false
-repository = { workspace = true}
+repository = { workspace = true }
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
@@ -16,25 +16,26 @@ targets = ["x86_64-unknown-linux-gnu"]
 sha3 = { workspace = true }
 impl-serde = { workspace = true }
 #parity-scale-codec = { version = "3.0.0", features = [ "derive" ] }
-libsecp256k1 = { workspace = true, features = [ "hmac" ] }
+libsecp256k1 = { workspace = true, features = ["hmac"] }
 log = "0.4.17"
 serde = "1.0.151"
+smallvec = "1.10.0"
 
 
-codec = {package = "parity-scale-codec", workspace = true, features = ["derive"] }
+codec = { package = "parity-scale-codec", workspace = true, features = ["derive"] }
 scale-info = { workspace = true, features = ["derive"] }
 
 pallet-aura = { workspace = true }
-pallet-session = { workspace = true, features = [ "historical" ] }
+pallet-session = { workspace = true, features = ["historical"] }
 pallet-authorship = { workspace = true }
 pallet-balances = { workspace = true }
 frame-support = { workspace = true }
-pallet-grandpa = { workspace = true }
 pallet-randomness-collective-flip = { workspace = true }
 pallet-sudo = { workspace = true }
 frame-system = { workspace = true }
 frame-try-runtime = { workspace = true, optional = true }
 pallet-timestamp = { workspace = true }
+pallet-treasury = { workspace = true }
 pallet-transaction-payment = { workspace = true }
 frame-executive = { workspace = true }
 sp-api = { workspace = true }
@@ -59,23 +60,66 @@ frame-benchmarking = { workspace = true, optional = true }
 frame-system-benchmarking = { workspace = true, optional = true }
 
 # evm dependencies
-pallet-evm = {  workspace = true }
-pallet-evm-precompile-simple = {  workspace = true }
-pallet-evm-precompile-modexp = {  workspace = true }
-pallet-evm-precompile-sha3fips = {  workspace = true }
-pallet-ethereum = {  workspace = true }
+pallet-evm = { workspace = true }
+pallet-evm-precompile-simple = { workspace = true }
+pallet-evm-precompile-modexp = { workspace = true }
+pallet-evm-precompile-sha3fips = { workspace = true }
+pallet-ethereum = { workspace = true }
 fp-evm = { workspace = true }
 fp-self-contained = { workspace = true }
 fp-rpc = { workspace = true }
 pallet-base-fee = { workspace = true }
 
+# moonbeam
+xcm-primitives = { workspace = true }
+pallet-ethereum-xcm = { workspace = true }
+moonbeam-evm-tracer = { workspace = true, optional = true }
+moonbeam-rpc-primitives-debug = { workspace = true }
+
+# Polkadot
+pallet-xcm = { workspace = true }
+polkadot-parachain = { workspace = true }
+polkadot-runtime-common = { workspace = true }
+xcm = { workspace = true }
+xcm-builder = { workspace = true }
+xcm-executor = { workspace = true }
+
+# Cumulus
+cumulus-pallet-aura-ext = { workspace = true }
+cumulus-pallet-dmp-queue = { workspace = true }
+cumulus-pallet-parachain-system = { workspace = true }
+cumulus-pallet-session-benchmarking = { workspace = true, optional = true }
+cumulus-pallet-xcm = { workspace = true }
+cumulus-pallet-xcmp-queue = { workspace = true }
+cumulus-primitives-core = { workspace = true }
+cumulus-primitives-timestamp = { workspace = true }
+cumulus-primitives-utility = { workspace = true }
+pallet-collator-selection = { workspace = true }
+parachain-info = { workspace = true }
+
 
 [build-dependencies]
-substrate-wasm-builder = {  git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.37" }
+substrate-wasm-builder = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.38" }
 
 [features]
 default = ["std"]
 std = [
+	# cumulus
+	"cumulus-pallet-aura-ext/std",
+	"cumulus-pallet-dmp-queue/std",
+	"cumulus-pallet-parachain-system/std",
+	"cumulus-pallet-xcm/std",
+	"cumulus-pallet-xcmp-queue/std",
+	"cumulus-primitives-core/std",
+	"cumulus-primitives-timestamp/std",
+	"cumulus-primitives-utility/std",
+	"pallet-collator-selection/std",
+
+	# moonbeam
+	"moonbeam-evm-tracer/std",
+	"pallet-ethereum-xcm/std",
+	"xcm-primitives/std",
+
 	"serde/std",
 	"frame-try-runtime?/std",
 	"frame-system-benchmarking?/std",
@@ -95,12 +139,16 @@ std = [
 	"pallet-base-fee/std",
 	"pallet-evm/std",
 	"pallet-ethereum/std",
-	"pallet-grandpa/std",
+	"pallet-ethereum-xcm/std",
 	"pallet-randomness-collective-flip/std",
 	"pallet-sudo/std",
 	"pallet-timestamp/std",
 	"pallet-transaction-payment-rpc-runtime-api/std",
 	"pallet-transaction-payment/std",
+	"pallet-xcm/std",
+	"parachain-info/std",
+	"polkadot-parachain/std",
+	"polkadot-runtime-common/std",
 	"sp-api/std",
 	"sp-block-builder/std",
 	"sp-consensus-aura/std",
@@ -113,27 +161,69 @@ std = [
 	"sp-std/std",
 	"sp-transaction-pool/std",
 	"sp-version/std",
+	"xcm-builder/std",
+	"xcm-executor/std",
+	"xcm/std",
 ]
+
+evm-tracing = [
+	# moonbeam
+	"moonbeam-evm-tracer"
+]
+
+fast-runtime = []
+
+# A feature that should be enabled when the runtime should be build for on-chain
+# deployment. This will disable stuff that shouldn't be part of the on-chain wasm
+# to make it smaller like logging for example.
+on-chain-release-build = [
+	# substrate
+	"sp-api/disable-logging",
+]
+
+
 runtime-benchmarks = [
+	# moonbeam
+	"pallet-ethereum-xcm/runtime-benchmarks",
+	"xcm-primitives/runtime-benchmarks",
+	# cumulus
+	"cumulus-pallet-parachain-system/runtime-benchmarks",
+	"cumulus-pallet-xcmp-queue/runtime-benchmarks",
+	# cumulus optional
+	"cumulus-pallet-session-benchmarking/runtime-benchmarks",
 	"frame-benchmarking/runtime-benchmarks",
 	"frame-support/runtime-benchmarks",
 	"frame-system-benchmarking/runtime-benchmarks",
 	"frame-system/runtime-benchmarks",
 	"pallet-balances/runtime-benchmarks",
-	"pallet-grandpa/runtime-benchmarks",
 	"pallet-timestamp/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
+	# polkadot
+	"pallet-xcm/runtime-benchmarks",
+	"polkadot-parachain/runtime-benchmarks",
+	"polkadot-runtime-common/runtime-benchmarks",
+	"xcm-builder/runtime-benchmarks",
+	"xcm-executor/runtime-benchmarks",
 ]
 try-runtime = [
-	"frame-try-runtime",
+	# cumulus
+	"cumulus-pallet-aura-ext/try-runtime",
+	"cumulus-pallet-dmp-queue/try-runtime",
+	"cumulus-pallet-parachain-system/try-runtime",
+	"cumulus-pallet-xcm/try-runtime",
+	"cumulus-pallet-xcmp-queue/try-runtime",
+	"parachain-info/try-runtime",
+	"frame-try-runtime/try-runtime",
 	"frame-executive/try-runtime",
 	"frame-system/try-runtime",
 	"frame-support/try-runtime",
 	"pallet-aura/try-runtime",
 	"pallet-balances/try-runtime",
-	"pallet-grandpa/try-runtime",
 	"pallet-randomness-collective-flip/try-runtime",
 	"pallet-sudo/try-runtime",
 	"pallet-timestamp/try-runtime",
 	"pallet-transaction-payment/try-runtime",
+	# polkadot
+	"pallet-xcm/try-runtime",
+	"polkadot-runtime-common/try-runtime",
 ]

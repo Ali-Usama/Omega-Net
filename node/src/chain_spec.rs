@@ -1,57 +1,58 @@
-use storage_chain_runtime::{
-	AccountId, BalancesConfig, GenesisConfig, SudoConfig, EVMConfig,
-	SystemConfig, WASM_BINARY, GenesisAccount, EthereumConfig, Balance, currency::*, SessionConfig,
-	opaque::SessionKeys,
-};
+use storage_chain_runtime::{*, opaque::*, currency::*};
+use cumulus_primitives_core::ParaId;
+use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::{ChainType, Properties};
 use hex_literal::hex;
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_core::{ Pair, Public, H160, U256};
-use sp_finality_grandpa::AuthorityId as GrandpaId;
-// use sp_runtime::traits::{IdentifyAccount, Verify};
 use std::{collections::BTreeMap, default::Default};
-// use frame_benchmarking::frame_support::metadata::StorageEntryModifier::Default;
-// use libsecp256k1::{PublicKey, PublicKeyFormat};
-// use sha3::{Digest};
+use serde::{Serialize, Deserialize};
 
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
-/// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
-pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
+/// Specialized `ChainSpec` for the storage-chain runtime
+pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig, Extensions>;
 
-// type AccountPublic = <Signature as Verify>::Signer;
+/// The default XCM version to set in genesis config.
+const SAFE_XCM_VERSION: u32 = xcm::prelude::XCM_VERSION;
+
+const PROTOCOL_ID: &str = "stor";
 
 /// Helper function to generate a crypto pair from seed
 fn get_from_secret<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
-	TPublic::Pair::from_string(seed, None)
+	TPublic::Pair::from_string(&format!("//{}", seed), None)
 		.unwrap_or_else(|_| panic!("Invalid string '{}'", seed))
 		.public()
 }
 
-/// Helper function to generate an account ID from seed
-// fn get_account_id_from_secret<TPublic: Public>(seed: &str) -> AccountId
-// 	where
-// 		AccountPublic: From<<TPublic::Pair as Pair>::Public>,
-// {
-// 	AccountPublic::from(get_from_secret::<TPublic>(seed)).into_account()
-// }
+/// This function's return type must always match the session keys of the chain in tuple format.
+fn get_collator_keys_from_seed(seed: &str) -> AuraId {
+	get_from_secret::<AuraId>(seed)
+}
 
-/// Helper function to generate an authority key for Aura
-// fn get_authority_keys_from_secret(seed: &str) -> (AccountId, AuraId, GrandpaId) {
-// 	(
-// 		// get_account_id_from_secret::<ed25519::Public>(seed),
-// 		AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")),
-// 		get_from_secret::<AuraId>(seed),
-// 		get_from_secret::<GrandpaId>(seed),
-// 	)
-// }
+/// The extensions for the [`ChainSpec`].
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ChainSpecGroup, ChainSpecExtension)]
+#[serde(deny_unknown_fields)]
+pub struct Extensions {
+	/// The relay chain of the Parachain.
+	pub relay_chain: String,
+	/// The id of the Parachain.
+	pub para_id: u32,
+}
+
+impl Extensions {
+	/// Try to get the extension from the given `ChainSpec`.
+	pub fn try_get(chain_spec: &dyn sc_service::ChainSpec) -> Option<&Self> {
+		sc_chain_spec::get_extension(chain_spec.extensions())
+	}
+}
+
 
 fn session_keys(
 	aura: AuraId,
-	grandpa: GrandpaId,
 ) -> SessionKeys {
-	SessionKeys { aura, grandpa }
+	SessionKeys { aura }
 }
 
 pub fn chainspec_properties() -> Properties {
@@ -68,20 +69,8 @@ const CHARLETH: &str = "0x798d4Ba9baf0064Ec19eB4F0a1a45785ae9D6DFc";
 const DOROTHY: &str = "0x773539d4Ac0e786233D90A233654ccEE26a613D9";
 // const ETHAN: &str = "0xFf64d3F6efE2317EE2807d223a0Bdc4c0c49dfDB";
 
-/// Helper function to get an `AccountId` from an ECDSA Key Pair.
-// pub fn get_account_id_from_pair(pair: ecdsa::Pair) -> Option<AccountId> {
-// 	let decompressed = PublicKey::parse_slice(&pair.public().0, Some(PublicKeyFormat::Compressed))
-// 		.ok()?
-// 		.serialize();
-//
-// 	let mut m = [0u8; 64];
-// 	m.copy_from_slice(&decompressed[1..65]);
-//
-// 	Some(H160::from(H256::from_slice(Keccak256::digest(&m).as_slice())).into())
-// }
 
 pub fn development_config() -> Result<ChainSpec, String> {
-	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
 
 	Ok(ChainSpec::from_genesis(
 		// Name
@@ -91,30 +80,22 @@ pub fn development_config() -> Result<ChainSpec, String> {
 		ChainType::Development,
 		move || {
 			testnet_genesis(
-				wasm_binary,
 				// Initial PoA authorities
 				vec![
+					// Bind the `Alice` to `Alith` to make `--alice` available for testnet.
 					(array_bytes::hex_n_into_unchecked(ALITH),
-					 get_from_secret::<AuraId>("//Alice"),
-					 get_from_secret::<GrandpaId>("//Alice")),
+					 get_collator_keys_from_seed("Alice"),
+					 ),
 				],
 				// Sudo account
 				AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")),
-				// get_account_id_from_secret::<ed25519::Public>("//Alice"),
 				// Pre-funded accounts
 				vec![
 					AccountId::from(hex!("f24FF3a9CF04c71Dbc94D0b566f7A27B94566cac")),
 					AccountId::from(hex!("7ed8c8a0C4d1FeA01275fE13F0Ef23bce5CBF8C3")),
 					AccountId::from(hex!("3263236Cbc327B5519E373CC591318e56e7c5081")),
-					// get_account_id_from_seed::<ecdsa::Public>("Bob"),
-					// get_account_id_from_seed::<ecdsa::Public>("Alice//stash"),
-					// get_account_id_from_seed::<ecdsa::Public>("Bob//stash"),
-					// get_account_id_from_secret::<ed25519::Public>("//Alice"),
-					// get_account_id_from_secret::<ed25519::Public>("//Bob"),
-					// get_account_id_from_secret::<sr25519::Public>("//Alice"),
-					// get_account_id_from_secret::<sr25519::Public>("//Bob"),
 				],
-				true,
+				2000.into(),
 			)
 		},
 		// Bootnodes
@@ -122,17 +103,19 @@ pub fn development_config() -> Result<ChainSpec, String> {
 		// Telemetry
 		None,
 		// Protocol ID
-		None,
+		Some(PROTOCOL_ID),
 		None,
 		// Properties
 		Some(chainspec_properties()),
 		// Extensions
-		None,
+		Extensions {
+			relay_chain: "rococo-local".into(),
+			para_id: 2000
+		},
 	))
 }
 
 pub fn local_testnet_config() -> Result<ChainSpec, String> {
-	let wasm_binary = WASM_BINARY.ok_or_else(|| "Development wasm not available".to_string())?;
 
 	Ok(ChainSpec::from_genesis(
 		// Name
@@ -142,18 +125,14 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 		ChainType::Local,
 		move || {
 			testnet_genesis(
-				wasm_binary,
 				// Initial PoA authorities
 				vec![
 					(array_bytes::hex_n_into_unchecked(ALITH),
-					 get_from_secret::<AuraId>("//Alice"),
-					 get_from_secret::<GrandpaId>("//Alice")),
+					 get_collator_keys_from_seed("Alice")),
 					(array_bytes::hex_n_into_unchecked(BALTATHAR),
-					 get_from_secret::<AuraId>("//Bob"),
-					 get_from_secret::<GrandpaId>("//Bob")),
+					 get_collator_keys_from_seed("Bob")),
 					(array_bytes::hex_n_into_unchecked(CHARLETH),
-					 get_from_secret::<AuraId>("//Charlie"),
-					 get_from_secret::<GrandpaId>("//Charlie")),
+					 get_collator_keys_from_seed("Charlie")),
 				],
 				// Sudo account
 				// AccountId::from(hex!("55D5E776997198679A8774507CaA4b0F7841767e")),
@@ -165,7 +144,7 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 					array_bytes::hex_n_into_unchecked(CHARLETH),
 					array_bytes::hex_n_into_unchecked(DOROTHY),
 				],
-				true,
+				2000.into(),
 			)
 		},
 		// Bootnodes
@@ -173,40 +152,80 @@ pub fn local_testnet_config() -> Result<ChainSpec, String> {
 		// Telemetry
 		None,
 		// Protocol ID
-		None,
+		Some(PROTOCOL_ID),
 		// Properties
 		None,
 		Some(chainspec_properties()),
 		// Extensions
-		None,
+		Extensions {
+			relay_chain: "rococo-local".into(),
+			para_id: 2000,
+		},
 	))
 }
 
 /// Configure initial storage state for FRAME modules.
 fn testnet_genesis(
-	wasm_binary: &[u8],
-	initial_authorities: Vec<(AccountId, AuraId, GrandpaId)>,
+	collators: Vec<(AccountId, AuraId)>,
 	root_key: AccountId,
 	endowed_accounts: Vec<AccountId>,
-	_enable_println: bool,
+	id: ParaId
 ) -> GenesisConfig {
 	const ENDOWMENT: Balance = 2_500_000_000 * STOR;
 	GenesisConfig {
+		// System config
 		system: SystemConfig {
 			// Add Wasm runtime to storage.
-			code: wasm_binary.to_vec(),
+			code: WASM_BINARY.unwrap().to_vec(),
 		},
+		parachain_info: ParachainInfoConfig { parachain_id: id },
+		parachain_system: Default::default(),
+
+		// Monetary config
 		balances: BalancesConfig {
 			// Configure endowed accounts with initial balance of 1 << 60.
-			balances: endowed_accounts.iter().cloned().map(|k| (k.clone(), ENDOWMENT / initial_authorities.len() as u128)).collect(),
+			balances: endowed_accounts.iter().cloned().map(|k| (k.clone(), ENDOWMENT / collators.len() as u128)).collect(),
 		},
+		transaction_payment: Default::default(),
+
+		// consensus config
 		aura: Default::default(),
-		grandpa: Default::default(),
+		aura_ext: Default::default(),
+		collator_selection: CollatorSelectionConfig {
+			invulnerables: collators.iter().cloned().map(|(acc, _)| acc).collect(),
+			candidacy_bond: EXISTENTIAL_DEPOSIT * 16,
+			..Default::default()
+		},
+		session: SessionConfig {
+			keys: collators
+				.into_iter()
+				.map(|(acc, aura)| {
+					(
+						acc.clone(),           // account id
+						acc,                   // validator id
+						session_keys(          // session keys
+							aura,
+						),
+					)
+				})
+				.collect::<Vec<_>>(),
+		},
+
+		// Governance config
+		treasury: Default::default(),
+
+		// XCM config
+		polkadot_xcm: PolkadotXcmConfig {
+			safe_xcm_version: Some(SAFE_XCM_VERSION),
+		},
+
+		// Sudo config (will be removed in future updates)
 		sudo: SudoConfig {
 			// Assign network admin rights.
 			key: Some(root_key),
 		},
-		transaction_payment: Default::default(),
+
+		// EVM config
 		evm: EVMConfig {
 			accounts: {
 				let mut accounts = BTreeMap::new();
@@ -221,20 +240,6 @@ fn testnet_genesis(
 				);
 				accounts
 			}
-		},
-		session: SessionConfig {
-			keys: initial_authorities
-				.into_iter()
-				.map(|(acc, aura, gran)| {
-					(
-						acc.clone(),
-						acc,
-						session_keys(
-							aura, gran,
-						),
-					)
-				})
-				.collect::<Vec<_>>(),
 		},
 		ethereum: Default::default(),
 		base_fee: Default::default(),
