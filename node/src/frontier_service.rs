@@ -17,7 +17,7 @@ use moonbeam_rpc_trace::{CacheRequester as TraceFilterCacheRequester, CacheTask}
 // substrate
 use sc_service::{BasePath, Configuration, TaskManager};
 // local
-use storage_chain_runtime::{BlockNumber, Hash, Hashing };
+use omega_net_runtime::{BlockNumber, Hash, Hashing };
 
 #[derive(Clone)]
 pub struct RpcRequesters {
@@ -158,7 +158,7 @@ pub(crate) fn db_config_dir(config: &Configuration) -> PathBuf {
 		.as_ref()
 		.map(|base_path| base_path.config_dir(config.chain_spec.id()))
 		.unwrap_or_else(|| {
-			BasePath::from_project("", "", "storage-chain")
+			BasePath::from_project("", "", "omega-net")
 				.config_dir(config.chain_spec.id())
 		})
 }

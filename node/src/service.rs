@@ -1,7 +1,7 @@
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
 
 // local
-use storage_chain_runtime::{self, opaque::Block, Balance, AccountId, Nonce, Hash};
+use omega_net_runtime::{self, opaque::Block, Balance, AccountId, Nonce, Hash};
 use crate::frontier_service::{TracingApi, spawn_frontier_tasks, db_config_dir};
 // substrate
 use sc_consensus::ImportQueue;
@@ -41,11 +41,11 @@ impl sc_executor::NativeExecutionDispatch for StorageRuntimeExecutor {
 	type ExtendHostFunctions = ();
 
 	fn dispatch(method: &str, data: &[u8]) -> Option<Vec<u8>> {
-		storage_chain_runtime::api::dispatch(method, data)
+		omega_net_runtime::api::dispatch(method, data)
 	}
 
 	fn native_version() -> sc_executor::NativeVersion {
-		storage_chain_runtime::native_version()
+		omega_net_runtime::native_version()
 	}
 }
 

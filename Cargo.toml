@@ -6,7 +6,7 @@ members = [
 
 [workspace.package]
 authors = ["Usama Ali"]
-repository = "https://github.com/Ali-Usama/storage-chain"
+repository = "https://github.com/Ali-Usama/omega-net"
 
 
 # make sure dev builds with backtrace do
@@ -156,7 +156,7 @@ frame-benchmarking = { git = "https://github.com/paritytech/substrate.git", bran
 frame-benchmarking-cli = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.38" }
 
 # Local Dependencies
-storage-chain-runtime = { path = "runtime" }
+omega-net-runtime = { path = "runtime" }
 
 # CLI-specific dependencies
 try-runtime-cli = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.38" }

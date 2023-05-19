@@ -49,7 +49,7 @@ pub use frame_support::{
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_REF_TIME_PER_SECOND},
 		IdentityFee, Weight, WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
 	},
-	StorageValue, PalletId
+	StorageValue, PalletId,
 };
 pub use frame_system::Call as SystemCall;
 use frame_system::EnsureRoot;
@@ -96,17 +96,16 @@ pub mod currency {
 	pub const KILOWEI: Balance = 1_000;
 	pub const MEGAWEI: Balance = 1_000_000;
 	pub const GIGAWEI: Balance = 1_000_000_000;
-	pub const MICROSTOR: Balance = 1_000_000_000_000;
-	pub const MILLISTOR: Balance = 1_000_000_000_000_000;
-	pub const STOR: Balance = 1_000_000_000_000_000_000;
-	pub const KILOSTOR: Balance = 1_000_000_000_000_000_000_000;
+	pub const MICROOMC: Balance = 1_000_000_000_000;
+	pub const MILLIOMC: Balance = 1_000_000_000_000_000;
+	pub const OMC: Balance = 1_000_000_000_000_000_000;
 
 	pub const TRANSACTION_BYTE_FEE: Balance = 1 * GIGAWEI * SUPPLY_FACTOR;
-	pub const STORAGE_BYTE_FEE: Balance = 100 * MICROSTOR * SUPPLY_FACTOR;
+	pub const STORAGE_BYTE_FEE: Balance = 100 * MICROOMC * SUPPLY_FACTOR;
 	pub const WEIGHT_FEE: Balance = 50 * KILOWEI * SUPPLY_FACTOR;
 
 	pub const fn deposit(items: u32, bytes: u32) -> Balance {
-		items as Balance * 100 * MILLISTOR * SUPPLY_FACTOR + (bytes as Balance) * STORAGE_BYTE_FEE
+		items as Balance * 100 * MILLIOMC * SUPPLY_FACTOR + (bytes as Balance) * STORAGE_BYTE_FEE
 	}
 }
 
@@ -136,8 +135,8 @@ pub mod opaque {
 // https://docs.substrate.io/main-docs/build/upgrade#runtime-versioning
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("storage-chain"),
-	impl_name: create_runtime_str!("storage-chain"),
+	spec_name: create_runtime_str!("omega-net"),
+	impl_name: create_runtime_str!("omega-net"),
 	authoring_version: 1,
 	// The version of the runtime specification. A full node will not attempt to use its native
 	//   runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
@@ -277,7 +276,7 @@ impl pallet_timestamp::Config for Runtime {
 }
 
 /// Existential deposit.
-pub const EXISTENTIAL_DEPOSIT: u128 = 1 * currency::MICROSTOR;
+pub const EXISTENTIAL_DEPOSIT: u128 = 1 * currency::MICROOMC;
 
 impl pallet_balances::Config for Runtime {
 	/// The type for recording an account's balance.
@@ -552,7 +551,7 @@ parameter_types! {
 	pub const TreasuryPalletId: frame_support::PalletId = frame_support::PalletId(*b"da/trsry");
 	pub const ProposalBond: sp_runtime::Permill = sp_runtime::Permill::from_percent(5);
 	pub const Burn: sp_runtime::Permill = sp_runtime::Permill::from_percent(5);
-	pub const ProposalBondMinimum: Balance = 1 * currency::STOR;
+	pub const ProposalBondMinimum: Balance = 1 * currency::OMC;
 	pub const SpendPeriod: BlockNumber = 10 * DAYS;
 	pub const MaxApprovals: u32 = 100;
 }
@@ -579,6 +578,7 @@ impl pallet_treasury::Config for Runtime {
 }
 
 pub struct EthereumXcmEnsureProxy;
+
 impl xcm_primitives::EnsureProxy<AccountId> for EthereumXcmEnsureProxy {
 	fn ensure_ok(_delegator: AccountId, _delegatee: AccountId) -> Result<(), &'static str> {
 		Err("Denied")
@@ -590,7 +590,7 @@ impl pallet_ethereum_xcm::Config for Runtime {
 	type ValidatedTransaction = pallet_ethereum::ValidatedTransaction<Self>;
 	type XcmEthereumOrigin = pallet_ethereum_xcm::EnsureXcmEthereumTransaction;
 	type ReservedXcmpWeight =
-		<Runtime as cumulus_pallet_parachain_system::Config>::ReservedXcmpWeight;
+	<Runtime as cumulus_pallet_parachain_system::Config>::ReservedXcmpWeight;
 	type EnsureProxy = EthereumXcmEnsureProxy;
 	type ControllerOrigin = EnsureRoot<AccountId>;
 }
@@ -1232,6 +1232,7 @@ mod tests {
 }
 
 struct CheckInherents;
+
 impl cumulus_pallet_parachain_system::CheckInherents<Block> for CheckInherents {
 	fn check_inherents(
 		block: &Block,
@@ -1246,8 +1247,8 @@ impl cumulus_pallet_parachain_system::CheckInherents<Block> for CheckInherents {
 				relay_chain_slot,
 				sp_std::time::Duration::from_secs(6),
 			)
-			.create_inherent_data()
-			.expect("Could not create the timestamp inherent data");
+				.create_inherent_data()
+				.expect("Could not create the timestamp inherent data");
 
 		inherent_data.check_extrinsics(block)
 	}

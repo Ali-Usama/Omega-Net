@@ -1,4 +1,4 @@
-use storage_chain_runtime::{*, opaque::*, currency::*};
+use omega_net_runtime::{*, opaque::*, currency::*};
 use cumulus_primitives_core::ParaId;
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::{ChainType, Properties};
@@ -11,13 +11,13 @@ use serde::{Serialize, Deserialize};
 // The URL for the telemetry server.
 // const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
-/// Specialized `ChainSpec` for the storage-chain runtime
+/// Specialized `ChainSpec` for the omega-net runtime
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig, Extensions>;
 
 /// The default XCM version to set in genesis config.
 const SAFE_XCM_VERSION: u32 = xcm::prelude::XCM_VERSION;
 
-const PROTOCOL_ID: &str = "stor";
+const PROTOCOL_ID: &str = "omc";
 
 /// Helper function to generate a crypto pair from seed
 fn get_from_secret<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pair>::Public {
@@ -58,7 +58,7 @@ fn session_keys(
 pub fn chainspec_properties() -> Properties {
 	let mut properties = Properties::new();
 	properties.insert("tokenDecimals".into(), 18.into());
-	properties.insert("tokenSymbol".into(), "STOR".into());
+	properties.insert("tokenSymbol".into(), "OMC".into());
 	properties
 }
 
@@ -171,7 +171,7 @@ fn testnet_genesis(
 	endowed_accounts: Vec<AccountId>,
 	id: ParaId
 ) -> GenesisConfig {
-	const ENDOWMENT: Balance = 2_500_000_000 * STOR;
+	const ENDOWMENT: Balance = 2_500_000_000 * OMC;
 	GenesisConfig {
 		// System config
 		system: SystemConfig {

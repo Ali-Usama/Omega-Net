@@ -22,7 +22,7 @@
 //
 // use crate::service::FullClient;
 //
-// use storage_chain_runtime as runtime;
+// use omega_net_runtime as runtime;
 // use runtime::{AccountId, Balance, BalancesCall, SystemCall};
 // use sc_cli::Result;
 // use sc_client_api::BlockBackend;

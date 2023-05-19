@@ -1,5 +1,5 @@
 [package]
-name = "storage-chain"
+name = "omega-net"
 version = "4.0.0-dev"
 description = "A fresh FRAME-based Substrate node, ready for hacking."
 authors = { workspace = true }
@@ -14,7 +14,7 @@ build = "build.rs"
 targets = ["x86_64-unknown-linux-gnu"]
 
 [[bin]]
-name = "storage-chain"
+name = "omega-net"
 
 [dependencies]
 log = "0.4"
@@ -75,7 +75,7 @@ frame-benchmarking = { workspace = true }
 frame-benchmarking-cli = { workspace = true }
 
 # Local Dependencies
-storage-chain-runtime = { workspace = true }
+omega-net-runtime = { workspace = true }
 
 # CLI-specific dependencies
 try-runtime-cli = { optional = true, workspace = true }
@@ -123,17 +123,17 @@ substrate-build-script-utils = { git = "https://github.com/paritytech/substrate.
 default = []
 # Dependencies that are only required if runtime benchmarking should be build.
 runtime-benchmarks = [
-	"storage-chain-runtime/runtime-benchmarks",
+	"omega-net-runtime/runtime-benchmarks",
 	"frame-benchmarking/runtime-benchmarks",
 	"frame-benchmarking-cli/runtime-benchmarks",
 ]
 # Enable features that allow the runtime to be tried and debugged. Name might be subject to change
 # in the near future.
-try-runtime = ["storage-chain-runtime/try-runtime", "try-runtime-cli"]
+try-runtime = ["omega-net-runtime/try-runtime", "try-runtime-cli"]
 
 #evm-tracing = [
-#	# storage-chain
-#	"storage-chain-runtime?/evm-tracing",
+#	# omega-net
+#	"omega-net-runtime?/evm-tracing",
 #
 #	# moonbeam
 #	"moonbeam-primitives-ext",

@@ -6,7 +6,7 @@ use crate::{
 	service, service::StorageRuntimeExecutor,
 	frontier_service::{db_config_dir},
 };
-use storage_chain_runtime::{opaque::Block, RuntimeApi as StorageRuntimeApi};
+use omega_net_runtime::{opaque::Block, RuntimeApi as StorageRuntimeApi};
 // std
 use std::{env, net::SocketAddr};
 use codec::Encode;
@@ -50,7 +50,7 @@ impl SubstrateCli for Cli {
 	}
 
 	fn support_url() -> String {
-		"https://github.com/Ali-Usama/storage-chain/issues".into()
+		"https://github.com/Ali-Usama/omega-net/issues".into()
 	}
 
 	fn copyright_start_year() -> i32 {
@@ -67,7 +67,7 @@ impl SubstrateCli for Cli {
 	}
 
 	fn native_runtime_version(_: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
-		&storage_chain_runtime::VERSION
+		&omega_net_runtime::VERSION
 	}
 }
 
@@ -95,7 +95,7 @@ impl SubstrateCli for RelayChainCli {
 	}
 
 	fn support_url() -> String {
-		"https://github.com/Ali-Usama/storage-chain/issues".into()
+		"https://github.com/Ali-Usama/omega-net/issues".into()
 	}
 
 	fn copyright_start_year() -> i32 {

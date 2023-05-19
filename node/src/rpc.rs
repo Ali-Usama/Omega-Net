@@ -8,7 +8,7 @@
 // std
 use std::sync::Arc;
 // local
-use storage_chain_runtime::{opaque::Block, AccountId, Balance, Hash, Hashing, Nonce};
+use omega_net_runtime::{opaque::Block, AccountId, Balance, Hash, Hashing, Nonce};
 // substrate
 use sc_client_api::{backend::{Backend, StorageProvider, StateBackend},
 					client::BlockchainEvents,

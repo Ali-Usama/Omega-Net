@@ -1,5 +1,5 @@
 [package]
-name = "storage-chain-runtime"
+name = "omega-net-runtime"
 version = "4.0.0-dev"
 description = "A fresh FRAME-based Substrate node, ready for hacking."
 authors = { workspace = true }
