@@ -10,6 +10,7 @@ use sp_core::{ecdsa, H160};
 
 #[cfg(feature = "std")]
 pub use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use sp_runtime::traits::Convert;
 
 //TODO Maybe this should be upstreamed into Frontier (And renamed accordingly) so that it can
 // be used in palletEVM as well. It may also need more traits such as AsRef, AsMut, etc like
@@ -170,5 +171,14 @@ pub struct IntoAddressMapping;
 impl<T: From<H160>> pallet_evm::AddressMapping<T> for IntoAddressMapping {
 	fn into_account_id(address: H160) -> T {
 		address.into()
+	}
+}
+
+/// A convertor from collators id. Since this pallet does not have stash/controller, this is
+/// just identity.
+pub struct IdentityCollator;
+impl<T> Convert<T, Option<T>> for IdentityCollator {
+	fn convert(t: T) -> Option<T> {
+		Some(t)
 	}
 }

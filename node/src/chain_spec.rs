@@ -236,7 +236,7 @@ fn testnet_genesis(
 				})
 				.collect::<Vec<_>>(),
 		},
-		ethereum: Default::default(),
+		ethereum: EthereumConfig::default(),
 		base_fee: Default::default(),
 	}
 }
